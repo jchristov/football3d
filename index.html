@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Turbo Football 3D</title>
+  <meta name="theme-color" content="#0b1226" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div id="rotate"><span>📱↻</span>Turn your device sideways to play</div>
+  <button id="muteBtn" title="Mute / unmute (M)" aria-label="Toggle sound">🔊</button>
+  <button id="fsBtn" title="Full screen (X)" aria-label="Toggle full screen">⛶</button>
+  <!-- outside #hud so that they stay clickable (to close the panels again) while an overlay is open -->
+  <div id="hudBtns" class="hidden">
+    <button id="hudTeam" title="Team changes (U) — formation and substitutions; the game pauses while open" aria-label="Toggle team changes">🔁</button>
+    <button id="hudSettings" title="Settings (O) — the game pauses while open" aria-label="Toggle settings">⚙</button>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div id="scoreboard">
+      <span id="cardsHome" class="mcards left"></span>
+      <span class="team"><i id="chipHome"></i><span class="nm"><span id="nameHome">BLU</span><small id="whoHome"></small></span></span>
+      <b id="scoreHome">0</b>
+      <span id="clockWrap"><span id="clock">3:00</span><small id="halfTag">1ST HALF</small></span>
+      <b id="scoreAway">0</b>
+      <span class="team"><span class="nm right"><span id="nameAway">RED</span><small id="whoAway"></small></span><i id="chipAway"></i></span>
+      <span id="cardsAway" class="mcards"></span>
+    </div>
+    <button id="evToggle" title="Match events: goals, cards, substitutions (I)">▾ Match events</button>
+    <div id="events" class="hidden"></div>
+    <div id="pens" class="hidden"></div>
+    <div id="autoBadge" class="hidden">AUTOPILOT <small>press T to take control</small></div>
+    <div id="banner"><h1></h1><p></p></div>
+    <div id="varFlash"><div class="varbox"><i class="varbadge">VAR</i><div class="vartext"><b></b><span></span></div></div><div class="varbar"></div></div>
+    <div id="cardFlash"><div class="cardset"><i class="rc yc"></i><i class="rc rd"></i></div><b></b><span></span></div>
+    <div id="toast"></div>
+    <div id="commentary"><b>🎙</b><span></span></div>
+    <div id="vitalsWrap">
+      <div class="vitals" id="vitals0"><b>P1</b><div class="vbar energy" title="Overall energy (the thin line underneath is the sprint tank)"><i></i><u></u><em>ENERGY</em></div><div class="vbar spec"><i class="d" data-l="D"></i><i class="m" data-l="M"></i><i class="a" data-l="A"></i></div></div>
+      <div class="vitals p2" id="vitals1"><b>P2</b><div class="vbar energy" title="Overall energy (the thin line underneath is the sprint tank)"><i></i><u></u><em>ENERGY</em></div><div class="vbar spec"><i class="d" data-l="D"></i><i class="m" data-l="M"></i><i class="a" data-l="A"></i></div></div>
+    </div>
+    <div id="powers">
+      <div class="powerWrap" id="powerWrap"><div class="power" id="power"></div></div>
+      <div class="powerWrap p2" id="powerWrap2"><div class="power" id="power2"></div></div>
+    </div>
+    <canvas id="minimap" width="200" height="130"></canvas>
+    <div id="help"></div>
+  </div>
+
+  <div id="replay" class="hidden">
+    <div class="bar top"></div><div class="bar bottom"></div>
+    <div class="tag"><span id="replayLabel">▶ REPLAY</span> <small>Space / Enter to skip</small> <button id="replaySave" title="Record this replay and save it as a video">💾 Save clip</button></div>
+  </div>
+
+  <div id="menu" class="overlay">
+    <div class="panel wide">
+      <h1>TURBO <span>FOOTBALL</span> 3D</h1>
+      <p class="tag">Arcade football from 3-a-side to 11-a-side. Score more than your opponent.</p>
+
+      <div class="grid">
+        <div>
+          <h3>Players</h3>
+          <div class="row" id="modeRow">
+            <button data-mode="1p" class="on">1 Player</button>
+            <button data-mode="2p">2 Players</button>
+            <button data-mode="cpu">CPU vs CPU</button>
+            <button data-mode="online" title="Play against a friend over the network (peer to peer)">🌐 Online</button>
+          </div>
+          <div class="row hidden" id="netRow"><button id="netOpen">🌐 Connection…</button><span id="netState" class="hint"></span></div>
+        </div>
+        <div>
+          <h3>Competition</h3>
+          <div class="row" id="compRow">
+            <button data-comp="friendly" class="on">Friendly</button>
+            <button data-comp="cup">Cup</button>
+            <button data-comp="league">League</button>
+            <button data-comp="career">Career</button>
+          </div>
+          <div id="careerBlock" class="hidden"><p class="hint" id="careerInfo"></p><button id="careerNew" class="hidden"></button></div>
+        </div>
+        <div>
+          <h3>Difficulty</h3>
+          <div class="row" id="diffRow">
+            <button data-diff="easy">Easy</button>
+            <button data-diff="normal" class="on">Normal</button>
+            <button data-diff="hard">Hard</button>
+          </div>
+        </div>
+        <div>
+          <h3>Time of day</h3>
+          <div class="row" id="timeRow">
+            <button data-time="day" class="on">Day</button>
+            <button data-time="dusk">Dusk</button>
+            <button data-time="night">Night</button>
+            <button data-time="random">Random</button>
+          </div>
+        </div>
+        <div>
+          <h3>Weather</h3>
+          <div class="row" id="weatherRow">
+            <button data-weather="clear" class="on">Clear</button>
+            <button data-weather="rain">Rain</button>
+            <button data-weather="snow">Snow</button>
+            <button data-weather="mud">Mud</button>
+            <button data-weather="wind">Wind</button>
+            <button data-weather="random">Random</button>
+          </div>
+          <h3>Stadium</h3>
+          <div class="row" id="stadiumRow">
+            <button data-stadium="arena" class="on">Arena</button>
+            <button data-stadium="classic">Classic</button>
+            <button data-stadium="neon">Neon</button>
+            <button data-stadium="random">Random</button>
+          </div>
+        </div>
+        <div>
+          <h3>Team size</h3>
+          <div class="row" id="teamSizeRow"></div>
+        </div>
+        <div>
+          <h3>Offside rule</h3>
+          <div class="row" id="offsideRow"><button data-off="0" class="on">Off</button><button data-off="1">On</button></div>
+        </div>
+        <div>
+          <h3>Match length</h3>
+          <div class="row" id="lengthRow"><button data-len="60">1 min</button><button data-len="120">2 min</button><button data-len="180" class="on">3 min</button><button data-len="300">5 min</button></div>
+        </div>
+        <div>
+          <h3>Pressing</h3>
+          <div class="row" id="pressRow"></div>
+        </div>
+        <div class="span2">
+          <h3>Formation</h3>
+          <div class="row" id="formRow"></div>
+        </div>
+        <div class="span2">
+          <h3>Ball</h3>
+          <div class="row" id="ballRow"></div>
+        </div>
+        <div class="span2">
+          <h3>Ball size</h3>
+          <div class="row" id="sizeRow"></div>
+        </div>
+      </div>
+
+      <h3 id="labelA">Your team</h3>
+      <div class="teams" id="teamsA"></div>
+      <div id="oppBlock">
+        <h3 id="labelB">Opponent</h3>
+        <div class="teams" id="teamsB"></div>
+      </div>
+
+      <div class="row"><button id="menuSquads"><span class="ico">👕</span> Squads &amp; looks</button><button id="menuSettings"><span class="ico">⚙</span> Settings &amp; controls</button></div>
+
+      <button id="startBtn" class="primary">Kick off <small>(Enter)</small></button>
+
+      <table class="keys">
+        <tr><td><b>WASD / Arrows</b></td><td>Move</td><td><b>Shift</b></td><td>Sprint</td></tr>
+        <tr><td><b>Space</b> (hold)</td><td>Shoot · <b>R</b> + shoot = curler</td><td><b>F</b></td><td>Pass · hold = lob / cross</td></tr>
+        <tr><td><b>E</b></td><td>Slide tackle (careful: fouls!)</td><td><b>Q</b></td><td>Switch player</td></tr>
+        <tr><td><b>T</b></td><td>Autopilot</td><td><b>V</b></td><td>Instant replay · <b>N</b> commentary</td></tr>
+        <tr><td><b>C</b></td><td>Camera</td><td><b>P / M</b></td><td>Pause / Mute</td></tr>
+        <tr><td><b>B</b></td><td>Bird's-eye minimap</td><td><b>H / O</b></td><td>Help / Settings</td></tr>
+        <tr><td><b>U</b></td><td>Team changes &amp; subs</td><td><b>I</b></td><td>Match events</td></tr>
+        <tr><td><b>G</b></td><td>Player bars</td><td><b>X</b></td><td>Full screen</td></tr>
+        <tr><td><b>Mouse</b></td><td colspan="3">move = run to the pointer · left = shoot (hold) · right = pass (hold = lob) · middle = tackle · wheel = switch</td></tr>
+        <tr><td colspan="4" class="p2keys"><b>Player 2:</b> Arrows · R-Shift · Enter shoot · ' curl · . pass · , tackle · / switch</td></tr>
+      </table>
+      <div class="row"><button id="installBtn" class="hidden" title="Install the game as an app: it then starts without a network">📲 Install the game</button></div>
+      <p class="credit">Crowd recordings: <a href="https://opengameart.org/content/free-crowd-cheering-sounds" target="_blank" rel="noopener">Gregor Quendel</a> (CC BY 4.0)</p>
+    </div>
+  </div>
+
+  <div id="tour" class="overlay hidden">
+    <div class="panel wide">
+      <h2 id="tourTitle"></h2>
+      <p class="tag" id="tourSub"></p>
+      <div id="tourBody"></div>
+      <div class="row">
+        <button id="tourPlay" class="primary">Play match</button>
+        <button id="tourQuit">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="end" class="overlay hidden">
+    <div class="panel">
+      <h2>FULL TIME</h2>
+      <div id="finalScore">0 - 0</div>
+      <p id="finalMsg"></p>
+      <button id="bestBtn" class="best hidden">🎬 Goal of the match <small id="bestLabel"></small></button>
+      <button id="clipBtn" class="hidden" title="Play the goal of the match and save it as a video file">💾 Save goal clip</button>
+      <div id="scorers"></div>
+      <div id="endRatings"></div>
+      <details class="analysis"><summary>Match analysis</summary><div id="endAnalysis"></div></details>
+      <div class="stats" id="endStats"></div>
+      <div class="row sticky">
+        <button id="rematchBtn" class="primary">Rematch <small>(Enter)</small></button>
+        <button id="continueBtn" class="primary hidden">Continue <small>(Enter)</small></button>
+        <button id="menuBtn">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pause" class="overlay hidden"><div class="panel"><h2>PAUSED</h2><div class="stats" id="pauseStats"></div><div class="row"><button id="pauseTactics">📋 Tactics &amp; subs</button><button id="pauseSettings">⚙ Settings</button></div><p class="resume">Press P to resume</p></div></div>
+
+  <div id="tactics" class="overlay hidden"></div>
+  <div id="squad" class="overlay hidden"></div>
+  <div id="settings" class="overlay hidden"></div>
+  <div id="helpScreen" class="overlay hidden"></div>
+  <div id="lineup" class="overlay hidden"></div>
+  <div id="netPanel" class="overlay hidden"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
