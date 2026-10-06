@@ -6,7 +6,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1226; f
 .hidden { display: none !important; }
 
 #hud { position: fixed; inset: 0; pointer-events: none; }
-#scoreboard { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 8px 20px; background: rgba(8,14,34,calc(var(--pa) * 0.907)); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; backdrop-filter: blur(6px); font-weight: 700; letter-spacing: .06em; }
+#scorewrap { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+#scoreboard { position: relative; display: flex; align-items: center; gap: 14px; padding: 8px 20px; background: rgba(8,14,34,calc(var(--pa) * 0.907)); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; backdrop-filter: blur(6px); font-weight: 700; letter-spacing: .06em; }
 #scoreboard b { font-size: 30px; min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
 #scoreboard .team { display: flex; align-items: center; gap: 8px; font-size: 14px; opacity: .92; }
 #scoreboard i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 2px solid #fff; }
@@ -361,9 +362,9 @@ button.card.reserve { opacity: .6; }
 #scoreboard .cb + .cb { margin-left: 2px; transform: rotate(5deg); }
 
 /* The expandable match-events panel under the score widget */
-#evToggle { position: absolute; top: 76px; left: 50%; transform: translateX(-50%); padding: 2px 14px; font-size: 11px; font-weight: 700; letter-spacing: .08em; border-radius: 0 0 10px 10px; background: rgba(8,14,34,calc(var(--pa) * 0.907)); border: 1px solid rgba(255,255,255,.14); border-top: 0; pointer-events: auto; opacity: .85; }
+#evToggle { position: relative; margin-top: -1px; backdrop-filter: blur(6px); padding: 2px 16px; font-size: 11px; font-weight: 700; letter-spacing: .08em; border-radius: 0 0 10px 10px; background: rgba(8,14,34,calc(var(--pa) * 0.907)); border: 1px solid rgba(255,255,255,.14); border-top: 0; pointer-events: auto; opacity: 1; color: rgba(255,255,255,.85); }
 #evToggle:hover { opacity: 1; }
-#events { position: absolute; top: 98px; left: 50%; transform: translateX(-50%); width: min(520px, 92vw); max-height: 44vh; display: flex; flex-direction: column; padding: 8px 12px 10px; border-radius: 12px; background: rgba(8,14,34,calc(var(--pa) * .9)); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(4px); pointer-events: auto; font-size: 13px; }
+#events { position: relative; margin-top: 6px; width: min(520px, 92vw); max-height: 44vh; display: flex; flex-direction: column; padding: 8px 12px 10px; border-radius: 12px; background: rgba(8,14,34,calc(var(--pa) * .9)); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(4px); pointer-events: auto; font-size: 13px; }
 #events .ev-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; letter-spacing: .15em; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.12); }
 #events .ev-head span { opacity: .6; font-size: 10px; }
 #events .ev-list { overflow-y: auto; padding-top: 4px; }
@@ -374,7 +375,6 @@ button.card.reserve { opacity: .6; }
 #events .ev small { opacity: .65; font-size: 11px; }
 #events .ev .in { color: #5cf0a0; } #events .ev .out { color: #ff8b80; }
 #events .ev.mid { display: block; text-align: center; font-size: 11px; letter-spacing: .15em; opacity: .75; padding: 5px 0; border-top: 1px dashed rgba(255,255,255,.18); border-bottom: 1px dashed rgba(255,255,255,.18); margin: 3px 0; }
-body.touch #evToggle { top: 76px; }
 #events { transition: opacity .2s; }
 #events.dim { opacity: .18; }
 
@@ -460,9 +460,7 @@ body.net-guest #rematchBtn { display: none !important; }
 /* ---- Accessibility ---- */
 html { --ui: 1; }
 /* the size slider scales the on-screen widgets around their anchor corner, panels with zoom */
-#scoreboard, #evToggle, #events, #autoBadge { scale: var(--ui); transform-origin: top center; }
-#evToggle { top: calc(76px * var(--ui)); }
-#events { top: calc(98px * var(--ui)); }
+#scorewrap, #autoBadge { scale: var(--ui); transform-origin: top center; } /* the events tab and panel hang from the score widget and scale with it */
 #minimap { scale: var(--ui); transform-origin: bottom right; }
 #help { scale: var(--ui); transform-origin: bottom left; }
 #vitalsWrap, #commentary, #cardFlash, #carrierBars { scale: var(--ui); transform-origin: bottom center; }
@@ -642,3 +640,4 @@ body.nokb:has(#replay:not(.hidden)) #touch .tb, body.nokb:has(#replay:not(.hidde
 body.nokb #replay .tag { font-size: 13px; padding: 4px 8px; top: 4px; left: 8px; }
 body.nokb #replay .tag button { min-height: 28px; padding: 0 10px; font-size: 12px; }
 body.nokb #touchHint { font-size: 10px; max-width: 54vw; bottom: 20%; }
+body.nokb:has(#events:not(.hidden)) #commentary { visibility: hidden; } /* the events list takes the commentary's place on a phone */

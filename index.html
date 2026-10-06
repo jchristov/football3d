@@ -22,17 +22,19 @@
   </div>
 
   <div id="hud" class="hidden">
-    <div id="scoreboard">
-      <span id="cardsHome" class="mcards left"></span>
-      <span class="team"><i id="chipHome"></i><span class="nm"><span id="nameHome">BLU</span><small id="whoHome"></small></span></span>
-      <b id="scoreHome">0</b>
-      <span id="clockWrap"><span id="clock">3:00</span><small id="halfTag">1ST HALF</small></span>
-      <b id="scoreAway">0</b>
-      <span class="team"><span class="nm right"><span id="nameAway">RED</span><small id="whoAway"></small></span><i id="chipAway"></i></span>
-      <span id="cardsAway" class="mcards"></span>
+    <div id="scorewrap">
+      <div id="scoreboard">
+        <span id="cardsHome" class="mcards left"></span>
+        <span class="team"><i id="chipHome"></i><span class="nm"><span id="nameHome">BLU</span><small id="whoHome"></small></span></span>
+        <b id="scoreHome">0</b>
+        <span id="clockWrap"><span id="clock">3:00</span><small id="halfTag">1ST HALF</small></span>
+        <b id="scoreAway">0</b>
+        <span class="team"><span class="nm right"><span id="nameAway">RED</span><small id="whoAway"></small></span><i id="chipAway"></i></span>
+        <span id="cardsAway" class="mcards"></span>
+      </div>
+      <button id="evToggle" title="Match events: goals, cards, substitutions (I)">▾ Match events</button>
+      <div id="events" class="hidden"></div>
     </div>
-    <button id="evToggle" title="Match events: goals, cards, substitutions (I)">▾ Match events</button>
-    <div id="events" class="hidden"></div>
     <div id="pens" class="hidden"></div>
     <div id="autoBadge" class="hidden">AUTOPILOT <small class="kb-only">press T to take control</small><small class="touch-only">tap to take control</small></div>
     <div id="banner"><h1></h1><p></p></div>
