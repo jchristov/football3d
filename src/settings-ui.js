@@ -76,7 +76,7 @@ export class SettingsUI {
       <h3>Match</h3>
       <div class="set-opts" id="setLength"><span>Friendly match length</span>${LENGTHS.map((l) => `<button data-l="${l}" class="${s.length === l ? 'on' : ''}">${l / 60} min</button>`).join('')}</div>
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setComm" ${s.commentary ? 'checked' : ''}> Live text commentary</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setMouse" ${s.mouse !== false ? 'checked' : ''}> Mouse control (run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch)</label></div>
+      <div class="set-opts kb-only" style="margin-top:8px"><label><input type="checkbox" id="setMouse" ${s.mouse !== false ? 'checked' : ''}> Mouse control (run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch)</label></div>
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setRestarts" ${s.restarts !== false ? 'checked' : ''}> Throw-ins, corners and goal kicks (off: the ball bounces off the boards)</label></div>
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setVar" ${s.var !== false ? 'checked' : ''}> VAR (a video review of penalties and straight red cards can overturn them)</label></div>
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setInj" ${s.injuries ? 'checked' : ''}> Injuries (hard challenges can hurt players)</label></div>
@@ -90,6 +90,10 @@ export class SettingsUI {
       <div class="set-row"><label for="s-ttsRate">Speed</label><input id="s-ttsRate" type="range" min="60" max="160" value="${Math.round((s.ttsRate || 1) * 100)}" data-tts="ttsRate"><output>${(s.ttsRate || 1).toFixed(2)}×</output></div>
       <div class="set-row"><label for="s-ttsVolume">Voice volume</label><input id="s-ttsVolume" type="range" min="0" max="100" value="${Math.round((s.ttsVolume ?? 1) * 100)}" data-tts="ttsVolume"><output>${Math.round((s.ttsVolume ?? 1) * 100)}%</output></div>
       <div class="set-opts"><button id="setTtsTest">🔊 Test voice</button><span class="hint" id="ttsStatus"></span></div>
+      <div class="touch-only"><h3>Touch controls</h3>
+        ${slider('touchScale', 'Size of the buttons', 60).replace('max="100"', 'max="140"')}
+        <div class="hint">The stick appears where you touch the left half of the screen; the buttons are on the right. Pause (⏸) has Resume, team changes, settings, camera and autopilot.</div></div>
+      <div class="kb-only">
       <h3>Controls</h3>
       <div class="set-opts" id="setScheme">${Object.entries(SCHEME_LABELS).map(([k, v]) => `<button data-s="${k}" class="${this.scheme === k ? 'on' : ''}">${v}</button>`).join('')}
         <button id="setResetKeys">Reset these keys</button></div>
@@ -98,6 +102,7 @@ export class SettingsUI {
       <div class="hint">Gamepad: left stick / D-pad move · B shoot · A pass (hold = lob) · X tackle · Y switch · LB curler · RB / triggers sprint · Start pause · Back camera · R3 replay.
         Touch controls appear automatically on touch devices.</div>
       <div class="shortcuts">${SHORTCUTS.map(([k, d]) => `<span><b>${k}</b> ${d}</span>`).join('')}</div>
+      </div>
       <div class="set-opts" style="margin-top:18px"><button id="setReset">Reset all settings</button><button id="setDone" class="primary">Done</button></div>
     </div>`;
     buildBallPicker(this.root.querySelector('#setBall'));

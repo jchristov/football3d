@@ -1,5 +1,6 @@
 import { GOAL, PITCH, clamp, attackDir } from './constants.js';
 import { settings } from './settings.js';
+import { RUN_AT } from './touch.js';
 
 export const ACTIONS = ['up', 'down', 'left', 'right', 'sprint', 'shoot', 'curl', 'pass', 'tackle', 'swap'];
 export const ACTION_LABELS = {
@@ -164,7 +165,9 @@ export class Controller {
     p.speedMul = 1;
     const charging = inp.down(...k.shoot);
     const t = this.mouseTarget();
-    const sprint = inp.down(...k.sprint) || !!(mv.mouse && t.d > 11 * Math.sqrt(PITCH.s) && p.stamina > 0.35); // far pointer: run flat out
+    const ts = inp.sticks?.Touch;
+    const edge = !!ts && Math.hypot(ts.x, ts.y) >= RUN_AT; // touch stick pushed to its edge
+    const sprint = inp.down(...k.sprint) || edge || !!(mv.mouse && t.d > 11 * Math.sqrt(PITCH.s) && p.stamina > 0.35); // far pointer: run flat out
     p.move(dx, dz, sprint, dt, charging ? 0.7 : 1);
 
     if (charging) p.charge = Math.min(1, p.charge + dt / 0.9);

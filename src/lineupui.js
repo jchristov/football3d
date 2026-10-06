@@ -71,8 +71,8 @@ export class LineupUI {
       <div class="lu-cols">${this.team(0)}${this.team(1)}</div>
       <div class="lu-legend">Bars: <span class="lg d"></span>defending <span class="lg m"></span>midfield <span class="lg a"></span>attacking · ⚠ out of position</div>
       <div class="row">
-        <button id="luTactics">📋 Tactics &amp; subs <small>(U)</small></button>
-        <button id="luStart" class="primary">Kick off <small>(Enter)</small></button>
+        <button id="luTactics">📋 Tactics &amp; subs <small class="kb-only">(U)</small></button>
+        <button id="luStart" class="primary">Kick off <small class="kb-only">(Enter)</small></button>
       </div>
     </div>`;
     $('luStart').onclick = () => this.start();

@@ -34,7 +34,7 @@
     <button id="evToggle" title="Match events: goals, cards, substitutions (I)">▾ Match events</button>
     <div id="events" class="hidden"></div>
     <div id="pens" class="hidden"></div>
-    <div id="autoBadge" class="hidden">AUTOPILOT <small>press T to take control</small></div>
+    <div id="autoBadge" class="hidden">AUTOPILOT <small class="kb-only">press T to take control</small><small class="touch-only">tap to take control</small></div>
     <div id="banner"><h1></h1><p></p></div>
     <div id="varFlash"><div class="varbox"><i class="varbadge">VAR</i><div class="vartext"><b></b><span></span></div></div><div class="varbar"></div></div>
     <div id="cardFlash"><div class="cardset"><i class="rc yc"></i><i class="rc rd"></i></div><b></b><span></span></div>
@@ -54,7 +54,7 @@
 
   <div id="replay" class="hidden">
     <div class="bar top"></div><div class="bar bottom"></div>
-    <div class="tag"><span id="replayLabel">▶ REPLAY</span> <small>Space / Enter to skip</small> <button id="replaySave" title="Record this replay and save it as a video">💾 Save clip</button></div>
+    <div class="tag"><span id="replayLabel">▶ REPLAY</span> <small class="kb-only">Space / Enter to skip</small> <button id="replaySkip" class="touch-only">Skip ⏭</button> <button id="replaySave" title="Record this replay and save it as a video">💾 Save clip</button></div>
   </div>
 
   <div id="menu" class="overlay">
@@ -67,7 +67,7 @@
           <h3>Players</h3>
           <div class="row" id="modeRow">
             <button data-mode="1p" class="on">1 Player</button>
-            <button data-mode="2p">2 Players</button>
+            <button data-mode="2p" class="kb-only">2 Players</button>
             <button data-mode="cpu">CPU vs CPU</button>
             <button data-mode="online" title="Play against a friend over the network (peer to peer)">🌐 Online</button>
           </div>
@@ -157,9 +157,9 @@
 
       <div class="row"><button id="menuSquads"><span class="ico">👕</span> Squads &amp; looks</button><button id="menuSettings"><span class="ico">⚙</span> Settings &amp; controls</button></div>
 
-      <button id="startBtn" class="primary">Kick off <small>(Enter)</small></button>
+      <div class="startbar"><button id="startBtn" class="primary">Kick off <small class="kb-only">(Enter)</small></button></div>
 
-      <table class="keys">
+      <table class="keys kb-only">
         <tr><td><b>WASD / Arrows</b></td><td>Move</td><td><b>Shift</b></td><td>Sprint</td></tr>
         <tr><td><b>Space</b> (hold)</td><td>Shoot · <b>R</b> + shoot = curler</td><td><b>F</b></td><td>Pass · hold = lob / cross</td></tr>
         <tr><td><b>E</b></td><td>Slide tackle (careful: fouls!)</td><td><b>Q</b></td><td>Switch player</td></tr>
@@ -200,14 +200,19 @@
       <details class="analysis"><summary>Match analysis</summary><div id="endAnalysis"></div></details>
       <div class="stats" id="endStats"></div>
       <div class="row sticky">
-        <button id="rematchBtn" class="primary">Rematch <small>(Enter)</small></button>
-        <button id="continueBtn" class="primary hidden">Continue <small>(Enter)</small></button>
+        <button id="rematchBtn" class="primary">Rematch <small class="kb-only">(Enter)</small></button>
+        <button id="continueBtn" class="primary hidden">Continue <small class="kb-only">(Enter)</small></button>
         <button id="menuBtn">Menu</button>
       </div>
     </div>
   </div>
 
-  <div id="pause" class="overlay hidden"><div class="panel"><h2>PAUSED</h2><div class="stats" id="pauseStats"></div><div class="row"><button id="pauseTactics">📋 Tactics &amp; subs</button><button id="pauseSettings">⚙ Settings</button></div><p class="resume">Press P to resume</p></div></div>
+  <div id="pause" class="overlay hidden"><div class="panel pausep">
+    <h2>PAUSED</h2>
+    <div class="row"><button id="pauseResume" class="primary">▶ Resume <small class="kb-only">(P)</small></button></div>
+    <div class="row"><button id="pauseTactics">📋 Tactics &amp; subs</button><button id="pauseSettings">⚙ Settings</button></div>
+    <div class="row pause-more"><button id="pauseCamera">🎥 Camera</button><button id="pauseAuto">🤖 Autopilot</button><button id="pauseFs" class="touch-only">⛶ Full screen</button><button id="pauseQuit">🏠 Quit match</button></div>
+    <div class="stats" id="pauseStats"></div><p class="resume kb-only">Press P to resume</p></div></div>
 
   <div id="tactics" class="overlay hidden"></div>
   <div id="squad" class="overlay hidden"></div>

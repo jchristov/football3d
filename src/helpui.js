@@ -48,7 +48,7 @@ export class HelpUI {
         <section><h3>Touch screen</h3><table>${rows(TOUCH)}</table></section>
       </div>
       <div class="hint">Rebind the movement and action keys in Settings (O). The game is paused while this screen is open.</div>
-      <div class="set-opts"><button id="helpDone" class="primary">Close <small>(H)</small></button></div>
+      <div class="set-opts"><button id="helpDone" class="primary">Close <small class="kb-only">(H)</small></button></div>
     </div>`;
     $('helpDone').onclick = () => this.hide();
   }

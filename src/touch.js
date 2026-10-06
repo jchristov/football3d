@@ -1,17 +1,16 @@
-const STICK_RADIUS = 56;
+const STICK_RADIUS = 46;
+export const RUN_AT = 0.92; // pushing the stick to its edge is a sprint (no sprint button)
+const HINT = '👈 Drag on the left to run (to the edge = sprint) · tap SHOOT / PASS on the right · TACKLE and SWITCH when defending';
+// Buttons in units of --tbu (the size of a small button, set in CSS from the screen height); right / bottom are the offsets from the corner
 const BUTTONS = [
-  { action: 'shoot', label: 'SHOOT', big: true, right: 26, bottom: 30 },
-  { action: 'pass', label: 'PASS', right: 130, bottom: 40 },
-  { action: 'tackle', label: 'TACKLE', right: 26, bottom: 136 },
-  { action: 'sprint', label: 'SPRINT', right: 130, bottom: 124 },
-  { action: 'swap', label: 'SWITCH', right: 224, bottom: 78 },
-  { action: 'curl', label: 'CURL', right: 224, bottom: 164, toggle: true },
+  { action: 'shoot', label: 'SHOOT', big: true, right: 0.2, bottom: 0.25 },
+  { action: 'pass', label: 'PASS', right: 1.75, bottom: 0.3 },
+  { action: 'tackle', label: 'TACKLE', right: 0.45, bottom: 1.8 },
+  { action: 'swap', label: 'SWITCH', right: 1.95, bottom: 1.55 },
+  { action: 'curl', label: 'CURL', right: 3.2, bottom: 0.45, toggle: true, small: true },
 ];
 
-export function touchWanted() {
-  if (typeof window === 'undefined') return false;
-  return /[?&]touch=1/.test(window.location.search) || !!window.matchMedia?.('(pointer: coarse)').matches || 'ontouchstart' in window;
-}
+export { touchWanted } from './device.js';
 
 // On-screen joystick and buttons that feed the same input codes as a gamepad ("Touch:shoot", ...)
 export class TouchControls {
@@ -20,7 +19,7 @@ export class TouchControls {
     this.curlOn = false;
     const root = (this.root = document.createElement('div'));
     root.id = 'touch';
-    root.innerHTML = '<div class="zone"></div><div class="knob"><i></i></div><div class="mini"><button data-k="KeyP">⏸</button><button data-k="KeyC">🎥</button><button data-k="KeyV">⏪</button><button data-k="KeyU">🔁</button><button data-k="KeyO">⚙</button></div>';
+    root.innerHTML = '<div class="zone"></div><div class="knob"><i></i></div><div class="mini"><button data-k="KeyP" aria-label="Pause">⏸</button><button data-k="KeyC" aria-label="Camera">🎥</button><button data-k="KeyV" aria-label="Instant replay">⏪</button></div>';
     hudRoot.appendChild(root);
     this.zone = root.querySelector('.zone');
     this.knob = root.querySelector('.knob');
@@ -29,8 +28,7 @@ export class TouchControls {
     for (const def of BUTTONS) this.addButton(def);
     root.querySelectorAll('.mini button').forEach((b) => b.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      if (b.dataset.k === 'KeyO' || b.dataset.k === 'KeyU') window.dispatchEvent(new KeyboardEvent('keydown', { code: b.dataset.k })); // opens the settings / team panel
-      else input.tap(b.dataset.k);
+      input.tap(b.dataset.k);
     }));
     document.body.classList.add('touch');
   }
@@ -53,24 +51,26 @@ export class TouchControls {
       const l = Math.hypot(dx, dy);
       if (l > 1) { dx /= l; dy /= l; }
       knobDot.style.transform = `translate(${dx * STICK_RADIUS * 0.7}px, ${dy * STICK_RADIUS * 0.7}px)`;
+      knob.classList.toggle('run', l >= RUN_AT);
       set(l < 0.15 ? 0 : dx, l < 0.15 ? 0 : dy);
     });
-    const end = (e) => { if (e.pointerId !== id) return; id = null; knob.style.display = 'none'; set(0, 0); };
+    const end = (e) => { if (e.pointerId !== id) return; id = null; knob.style.display = 'none'; knob.classList.remove('run'); set(0, 0); };
     zone.addEventListener('pointerup', end);
     zone.addEventListener('pointercancel', end);
   }
 
-  addButton({ action, label, big, right, bottom, toggle }) {
+  addButton({ action, label, big, small, right, bottom, toggle }) {
     const el = document.createElement('div');
-    el.className = `tb${big ? ' big' : ''}`;
+    el.className = `tb${big ? ' big' : ''}${small ? ' small' : ''}`;
+    el.dataset.a = action;
     el.textContent = label;
-    el.style.right = `${right}px`; el.style.bottom = `${bottom}px`;
+    el.style.right = `calc(var(--tbu) * ${right})`; el.style.bottom = `calc(var(--tbu) * ${bottom})`;
     const code = `Touch:${action}`;
     const input = this.input;
     if (toggle) {
       el.addEventListener('pointerdown', (e) => { e.preventDefault(); this.setCurl(!this.curlOn, el); });
     } else {
-      el.addEventListener('pointerdown', (e) => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch { /* synthetic or already released pointer */ } el.classList.add('on'); input.setCode(code, true); });
+      el.addEventListener('pointerdown', (e) => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch { /* synthetic or already released pointer */ } el.classList.add('on'); input.setCode(code, true); navigator.vibrate?.(8); });
       const up = () => {
         el.classList.remove('on'); input.setCode(code, false);
         if (action === 'shoot' && this.curlOn) setTimeout(() => this.setCurl(false, this.curlEl), 150); // the shot is read next frame
@@ -80,6 +80,23 @@ export class TouchControls {
     }
     if (toggle) this.curlEl = el;
     this.root.appendChild(el);
+  }
+
+  // What the player is doing decides which buttons matter: 'ball' (shoot, pass), 'chase' (tackle, switch) or 'idle'
+  setContext(mode) {
+    if (this.ctx === mode) return;
+    this.ctx = mode;
+    this.root.dataset.ctx = mode;
+  }
+
+  // A short hint over the pitch: how to play with the touch controls
+  hint(ms = 7000) {
+    this.hintEl?.remove();
+    const el = this.hintEl = document.createElement('div');
+    el.id = 'touchHint'; el.textContent = HINT;
+    this.root.appendChild(el);
+    setTimeout(() => el.remove(), ms);
+    el.addEventListener('pointerdown', () => el.remove());
   }
 
   setCurl(on, el) {

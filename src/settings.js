@@ -26,6 +26,8 @@ export const makeDefaults = () => ({
   restarts: true, // throw-ins, corners and goal kicks (off: the ball bounces off the boards)
   autoQuality: true, // lower the graphics quality automatically when the frame rate is poor
   colorBlind: false, // colour-blind-safe palette for the speciality bars and the cards
+  touchHint: true, // show the how-to-play hint of the touch controls once
+  touchScale: 1, // size of the touch buttons on phones and tablets, 0.6 - 1.4
   uiScale: 1, // size of the on-screen widgets and panels, 0.8 - 1.5
   reducedMotion: null, // null = follow the system preference, true / false = chosen in Settings
   announcer: true, // stadium announcer (PA voice) for line-ups, goals, cards and substitutions
@@ -76,5 +78,6 @@ export function onSettings(fn) { listeners.add(fn); return () => listeners.delet
 loadSettings();
 
 // Accessibility helpers (pure, so they can be tested)
+export const clampTouchScale = (v) => Math.min(1.4, Math.max(0.6, Number(v) || 1));
 export const clampUiScale = (v) => Math.min(1.5, Math.max(0.8, Number(v) || 1));
 export const motionReduced = (s = settings, systemPrefers = false) => (s.reducedMotion === null || s.reducedMotion === undefined ? !!systemPrefers : !!s.reducedMotion);

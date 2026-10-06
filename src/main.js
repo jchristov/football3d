@@ -8,7 +8,8 @@ import { Sfx } from './audio.js';
 import { Menu } from './menu.js';
 import { SettingsUI } from './settings-ui.js';
 import { PadNav } from './padnav.js';
-import { TouchControls, touchWanted } from './touch.js';
+import { TouchControls } from './touch.js';
+import { applyDevice, touchWanted, phoneFactor, panelZoom } from './device.js';
 import { bindMouse } from './mouse.js';
 import { TacticsUI } from './tacticsui.js';
 import { SquadUI } from './squadui.js';
@@ -17,8 +18,9 @@ import { LineupUI } from './lineupui.js';
 import { NetUI } from './net/netui.js';
 import { ClipRecorder } from './recorder.js';
 import { FpsGovernor, NEXT_LOWER } from './perf.js';
-import { settings, onSettings, saveSettings, clampUiScale, motionReduced } from './settings.js';
+import { settings, onSettings, saveSettings, clampUiScale, clampTouchScale, motionReduced } from './settings.js';
 
+applyDevice(); // phones and tablets: touch controls, no keyboard hints (body.nokb)
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.shadowMap.enabled = true;
@@ -99,8 +101,8 @@ game.startMatch = (cfg) => {
   if (settings.lineupScreen && cfg.mode !== 'cpu' && !cfg.net) {
     game.hold = true;
     game.modal = true;
-    lineupUI.show(() => { game.hold = false; game.modal = false; });
-  }
+    lineupUI.show(() => { game.hold = false; game.modal = false; showTouchHint(); });
+  } else if (cfg.mode === '1p') showTouchHint();
 };
 game.onHalftime = () => tacticsUI.show({ halftime: true });
 const padNav = new PadNav(input, menu, settingsUI);
@@ -109,6 +111,14 @@ let touchControls = null;
 const enableTouch = () => { touchControls ||= new TouchControls(input, document.getElementById('hud')); };
 if (touchWanted()) enableTouch();
 window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') enableTouch(); }, { passive: true });
+// Which touch buttons matter right now: with the ball (shoot, pass) or without it (tackle, switch)
+const touchContext = () => {
+  const c = game.ctrls[0];
+  if (game.attract || !c?.enabled || !c.player || game.state === 'ended') return 'idle';
+  const b = game.ball;
+  return b.owner === c.player || b.held === c.player || (game.state === 'setpiece' && game.rules.sp?.kicker === c.player) ? 'ball' : 'chase';
+};
+const showTouchHint = () => { if (touchControls && document.body.classList.contains('nokb') && settings.touchHint !== false) { touchControls.hint(); settings.touchHint = false; saveSettings(); } };
 // Mouse: run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch (Settings can switch it off)
 bindMouse(input, canvas);
 game.pointerRect = () => canvas.getBoundingClientRect();
@@ -150,7 +160,10 @@ const applyUi = () => {
   hud.setMinimap(settings.minimap);
   const a = Math.min(1, Math.max(0.3, Number(settings.panelOpacity) || 0.86));
   document.documentElement.style.setProperty('--pa', a);
-  document.documentElement.style.setProperty('--ui', clampUiScale(settings.uiScale));
+  const ui = clampUiScale(settings.uiScale);
+  document.documentElement.style.setProperty('--uz', ui * (document.body.classList.contains('nokb') ? panelZoom(window.innerHeight) : 1)); // panels: smaller on a phone
+  document.documentElement.style.setProperty('--ui', ui * (document.body.classList.contains('nokb') ? phoneFactor(window.innerHeight) : 1)); // on-screen widgets: smaller on a phone held sideways
+  document.documentElement.style.setProperty('--ts', clampTouchScale(settings.touchScale)); // touch buttons
   document.body.classList.toggle('cblind', !!settings.colorBlind);
   const rm = motionReduced(settings, typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
   document.body.classList.toggle('rm', rm);
@@ -158,6 +171,7 @@ const applyUi = () => {
 };
 applyUi();
 onSettings(applyUi);
+window.addEventListener('resize', applyUi);
 document.getElementById('hudSettings').addEventListener('click', (e) => { toggleSettings(); e.currentTarget.blur(); });
 document.getElementById('hudTeam').addEventListener('click', (e) => { toggleTeam(); e.currentTarget.blur(); });
 const fsBtn = document.getElementById('fsBtn');
@@ -176,6 +190,36 @@ document.getElementById('evToggle').addEventListener('click', (e) => { toggleEve
 document.getElementById('menuSettings').addEventListener('click', openSettings);
 document.getElementById('menuSquads').addEventListener('click', () => squadUI.show());
 document.getElementById('pauseTactics').addEventListener('click', () => tacticsUI.show());
+// The pause menu works without a keyboard: resume, camera, autopilot, full screen and quitting the match are buttons
+const $id = (id) => document.getElementById(id);
+const quitBtn = $id('pauseQuit');
+let quitTimer = 0;
+const QUIT_LABEL = '🏠 Quit match';
+const refreshPause = () => {
+  const solo = game.mode === '1p' && !game.rules.so;
+  $id('pauseAuto').disabled = !solo;
+  $id('pauseAuto').classList.toggle('on', game.autopilot);
+  $id('pauseCamera').textContent = `🎥 Camera: ${game.camModes[game.camMode] || ''}`;
+  clearTimeout(quitTimer); quitBtn.textContent = QUIT_LABEL; quitBtn.classList.remove('armed');
+};
+const showPause = hud.showPause.bind(hud);
+hud.showPause = (on) => { showPause(on); if (on) refreshPause(); };
+$id('pauseResume').addEventListener('click', () => game.togglePause());
+$id('pauseCamera').addEventListener('click', () => { input.tap('KeyC'); setTimeout(refreshPause, 60); });
+$id('pauseAuto').addEventListener('click', () => { game.toggleAutopilot(); refreshPause(); });
+$id('pauseFs').addEventListener('click', toggleFullscreen);
+quitBtn.addEventListener('click', () => {
+  if (!quitBtn.classList.contains('armed')) {
+    quitBtn.classList.add('armed'); quitBtn.textContent = 'Tap again to quit';
+    quitTimer = setTimeout(() => { quitBtn.classList.remove('armed'); quitBtn.textContent = QUIT_LABEL; }, 3000);
+    return;
+  }
+  clearTimeout(quitTimer);
+  hud.showPause(false);
+  menu.toMenu();
+});
+$id('autoBadge').addEventListener('click', () => game.toggleAutopilot()); // touch: tap the badge to take control again
+$id('replaySkip').addEventListener('click', () => game.endReplay());
 document.getElementById('pauseSettings').addEventListener('click', openSettings);
 document.getElementById('bestBtn').addEventListener('click', () => game.playBest());
 document.getElementById('clipBtn').addEventListener('click', () => { game.recordNext = true; if (!game.playBest()) game.recordNext = false; });
@@ -222,6 +266,7 @@ function frame(now) {
   checkPerformance(dt);
   game.update(dt);
   canvas.classList.toggle('aim', game.mouseOn);
+  touchControls?.setContext(touchContext());
   padNav.update();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

@@ -466,7 +466,7 @@ html { --ui: 1; }
 #minimap { scale: var(--ui); transform-origin: bottom right; }
 #help { scale: var(--ui); transform-origin: bottom left; }
 #vitalsWrap, #commentary, #cardFlash, #carrierBars { scale: var(--ui); transform-origin: bottom center; }
-.panel { zoom: var(--ui); max-height: calc(94vh / var(--ui)); max-width: calc(96vw / var(--ui)); } /* zoom scales the limits too */
+.panel { zoom: var(--uz, 1); max-height: calc(94vh / var(--uz, 1)); max-width: calc(96vw / var(--uz, 1)); } /* zoom scales the limits too */
 #commentary { bottom: calc(112px * var(--ui)); }
 #vitalsWrap { bottom: calc(58px * var(--ui)); }
 
@@ -583,3 +583,62 @@ body.cblind .fg.W { background: #56b4e9; } body.cblind .fg.L { background: #d55e
 }
 #settings h2 button, .sq h2 button { width: var(--btn-h); height: var(--btn-h); min-height: 0; padding: 0; }
 #touch .mini button { min-height: var(--btn-h); }
+
+/* ---------- Phones and tablets without a keyboard (body.nokb) ----------
+   Touch controls sized from the screen height (--tbu), a compact top bar, no keyboard hints. `?touch=1` shows this on a computer. */
+.touch-only { display: none !important; }
+body.nokb .kb-only { display: none !important; }
+body.nokb div.touch-only { display: block !important; }
+body.nokb button.touch-only { display: inline-flex !important; }
+body.nokb small.touch-only { display: inline !important; }
+body.touch { --tbu: calc(clamp(34px, 9.5vh, 46px) * var(--ts, 1)); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.touch input, body.touch textarea { -webkit-user-select: text; user-select: text; }
+body.touch #touch { left: env(safe-area-inset-left); right: env(safe-area-inset-right); bottom: env(safe-area-inset-bottom); }
+body.touch #touch .zone { width: 44vw; height: 68vh; }
+body.touch #touch .knob { width: 96px; height: 96px; margin: -48px 0 0 -48px; }
+body.touch #touch .knob i { width: 42px; height: 42px; margin: -21px 0 0 -21px; }
+body.touch #touch .tb { width: var(--tbu); height: var(--tbu); font-size: calc(var(--tbu) * .25); letter-spacing: -.02em; padding: 0; transition: opacity .2s, transform .15s, background .15s; background: rgba(8, 14, 34, .42); border-width: 2px; border-color: rgba(255, 255, 255, .4); }
+body.touch #touch .tb.on { background: rgba(46, 226, 122, .55); border-color: #7dffb5; }
+body.touch #touch .tb.big { width: calc(var(--tbu) * 1.35); height: calc(var(--tbu) * 1.35); font-size: calc(var(--tbu) * .3); }
+body.touch #touch .tb.small { width: calc(var(--tbu) * .8); height: calc(var(--tbu) * .8); font-size: calc(var(--tbu) * .2); }
+body.touch #touch .tb::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; } /* a larger touch area than the circle */
+/* what matters now: the buttons of the other situation fade out, the main one pulses */
+body.touch #touch[data-ctx="ball"] .tb[data-a="tackle"], body.touch #touch[data-ctx="chase"] .tb[data-a="shoot"], body.touch #touch[data-ctx="chase"] .tb[data-a="pass"], body.touch #touch[data-ctx="chase"] .tb[data-a="curl"] { opacity: .35; }
+body.touch #touch[data-ctx="ball"] .tb[data-a="shoot"] { border-color: #7dffb5; background: rgba(46, 226, 122, .28); }
+body.touch #touch[data-ctx="chase"] .tb[data-a="tackle"] { border-color: #ffd21e; background: rgba(255, 210, 30, .22); }
+body.touch #touch[data-ctx="idle"] .tb { opacity: .4; }
+body.touch #touch .knob.run { border-color: #7dffb5; background: rgba(46, 226, 122, .18); }
+body.touch #touch .knob.run i { background: rgba(125, 255, 181, .85); }
+#touchHint { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); max-width: 62vw; padding: 6px 12px; border-radius: 10px; background: rgba(8, 14, 34, .85); border: 1px solid rgba(255, 255, 255, .3); font-size: 11px; font-weight: 600; text-align: center; pointer-events: auto; animation: hintIn .3s ease-out; }
+@keyframes hintIn { from { opacity: 0; transform: translate(-50%, 8px); } }
+body.nokb #touch .mini { left: calc(8px + env(safe-area-inset-left)); top: 6px; gap: 6px; }
+body.nokb #touch .mini button { width: 32px; height: 32px; min-width: 0; min-height: 0; padding: 0; font-size: 13px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+body.nokb #muteBtn, body.nokb #fsBtn, body.nokb #hudTeam { width: 32px; height: 32px; font-size: 14px; top: 6px; }
+body.nokb #muteBtn { right: calc(8px + env(safe-area-inset-right)); }
+body.nokb #fsBtn { right: calc(46px + env(safe-area-inset-right)); }
+body.nokb #hudTeam { right: calc(84px + env(safe-area-inset-right)); }
+body.nokb #hudSettings { display: none; } /* settings are in the pause menu */
+body.nokb #autoBadge { pointer-events: auto; cursor: pointer; }
+body.nokb #commentary { bottom: auto; top: calc(100px * var(--ui)); transform-origin: top center; max-width: 52vw; padding: 3px 10px; font-size: 11px; }
+body.nokb #commentary b { font-size: 12px; }
+body.nokb #toast { font-size: 16px; top: 34%; }
+body.nokb #banner h1 { font-size: clamp(30px, 8vh, 64px); }
+body.nokb #banner p { font-size: clamp(13px, 3.4vh, 20px); }
+body.nokb .overlay { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); box-sizing: border-box; }
+body.nokb .panel { padding: 14px 18px; }
+body.nokb .panel.wide { padding: 12px 16px; }
+body.nokb .panel h1 { font-size: 28px; }
+body.nokb .panel h2 { font-size: 30px; }
+body.nokb { --btn-h: 40px; --btn-h-sm: 32px; }
+body.nokb #menu .panel .tag { display: none; }
+body.nokb .startbar { position: sticky; bottom: -14px; z-index: 3; margin: 6px -18px -14px; padding: 16px 0 12px; background: linear-gradient(rgba(12, 20, 46, 0), rgba(12, 20, 46, .97) 32%); }
+body.nokb #startBtn { margin-top: 0; font-size: 18px; padding: 0 44px; }
+.pausep .row.pause-more { flex-wrap: wrap; }
+#pauseQuit.armed { border-color: #ff6a5e; background: rgba(255, 106, 94, .22); }
+#replay .tag button#replaySkip { margin-left: 8px; }
+body.nokb:has(#settings:not(.hidden), #tactics:not(.hidden), #squad:not(.hidden), #lineup:not(.hidden), #netPanel:not(.hidden), #pause:not(.hidden), #helpScreen:not(.hidden)) :is(#hudTeam, #fsBtn, #muteBtn) { display: none; }
+body.nokb #tactics .panel > .row:last-child, body.nokb #lineup .panel > .row:last-child, body.nokb #end .panel > .row:last-child { position: sticky; bottom: -14px; margin-bottom: -14px; padding: 12px 0 10px; background: linear-gradient(rgba(12, 20, 46, 0), rgba(12, 20, 46, .97) 35%); z-index: 3; }
+body.nokb:has(#replay:not(.hidden)) #touch .tb, body.nokb:has(#replay:not(.hidden)) #touch .zone { display: none; }
+body.nokb #replay .tag { font-size: 13px; padding: 4px 8px; top: 4px; left: 8px; }
+body.nokb #replay .tag button { min-height: 28px; padding: 0 10px; font-size: 12px; }
+body.nokb #touchHint { font-size: 10px; max-width: 54vw; bottom: 20%; }
