@@ -70,6 +70,15 @@ test('the touch buttons have no sprint button any more and fit the corner', () =
 
 test('the autopilot badge sits at the right edge and steps aside during a replay', () => {
   const css = read('src/style.css');
-  assert.match(css, /#autoBadge \{ top: calc\(124px \* var\(--ui\)\); left: auto; right: 14px;/);
+  assert.match(css, /#autoBadge \{ left: auto; right: 14px;/);
   assert.match(css, /body:has\(#replay:not\(\.hidden\)\) #autoBadge \{ display: none; \}/);
+});
+
+test('the round buttons form one row in the top-right corner; the full-screen button has its own enter / leave icons', async () => {
+  const css = read('src/style.css');
+  const right = (id) => Number(new RegExp(`#${id} \\{ position: fixed; top: 14px; right: (\\d+)px`).exec(css)[1]);
+  assert.deepEqual(['muteBtn', 'fsBtn', 'hudSettings', 'hudTeam'].map(right), [14, 68, 122, 176], 'same top, 54 px apart');
+  const { FS_ENTER, FS_EXIT } = await import('../src/icons.js');
+  assert.match(FS_ENTER, /^<svg/); assert.match(FS_EXIT, /^<svg/); assert.notEqual(FS_ENTER, FS_EXIT);
+  assert.doesNotMatch(read('index.html'), /⛶|🗗/ , 'no emoji glyph for the full-screen button');
 });

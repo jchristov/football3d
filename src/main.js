@@ -10,6 +10,7 @@ import { SettingsUI } from './settings-ui.js';
 import { PadNav } from './padnav.js';
 import { TouchControls } from './touch.js';
 import { applyDevice, touchWanted, phoneFactor, panelZoom } from './device.js';
+import { FS_ENTER, FS_EXIT } from './icons.js';
 import { bindMouse } from './mouse.js';
 import { TacticsUI } from './tacticsui.js';
 import { SquadUI } from './squadui.js';
@@ -177,7 +178,15 @@ document.getElementById('hudTeam').addEventListener('click', (e) => { toggleTeam
 const fsBtn = document.getElementById('fsBtn');
 if (!document.documentElement.requestFullscreen) fsBtn.classList.add('hidden');
 fsBtn.addEventListener('click', () => { toggleFullscreen(); fsBtn.blur(); });
-document.addEventListener('fullscreenchange', () => { fsBtn.textContent = document.fullscreenElement ? '🗗' : '⛶'; });
+const showFsIcon = () => {
+  const on = !!document.fullscreenElement;
+  fsBtn.innerHTML = on ? FS_EXIT : FS_ENTER;
+  fsBtn.title = on ? 'Leave full screen (X)' : 'Full screen (X)';
+  const pf = document.getElementById('pauseFs');
+  if (pf) pf.innerHTML = `${on ? FS_EXIT : FS_ENTER} ${on ? 'Leave full screen' : 'Full screen'}`;
+};
+document.addEventListener('fullscreenchange', showFsIcon);
+showFsIcon();
 
 // Install as an app (the browser offers this when the manifest and the service worker are in place)
 let installEvent = null;

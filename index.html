@@ -14,7 +14,7 @@
   <canvas id="scene"></canvas>
   <div id="rotate"><span>📱↻</span>Turn your device sideways to play</div>
   <button id="muteBtn" title="Mute / unmute (M)" aria-label="Toggle sound">🔊</button>
-  <button id="fsBtn" title="Full screen (X)" aria-label="Toggle full screen">⛶</button>
+  <button id="fsBtn" title="Full screen (X)" aria-label="Toggle full screen"></button>
   <!-- outside #hud so that they stay clickable (to close the panels again) while an overlay is open -->
   <div id="hudBtns" class="hidden">
     <button id="hudTeam" title="Team changes (U) — formation and substitutions; the game pauses while open" aria-label="Toggle team changes">🔁</button>
@@ -213,7 +213,7 @@
     <h2>PAUSED</h2>
     <div class="row"><button id="pauseResume" class="primary">▶ Resume <small class="kb-only">(P)</small></button></div>
     <div class="row"><button id="pauseTactics">📋 Tactics &amp; subs</button><button id="pauseSettings">⚙ Settings</button></div>
-    <div class="row pause-more"><button id="pauseCamera">🎥 Camera</button><button id="pauseAuto">🤖 Autopilot</button><button id="pauseFs" class="touch-only">⛶ Full screen</button><button id="pauseQuit">🏠 Quit match</button></div>
+    <div class="row pause-more"><button id="pauseCamera">🎥 Camera</button><button id="pauseAuto">🤖 Autopilot</button><button id="pauseFs" class="touch-only">Full screen</button><button id="pauseQuit">🏠 Quit match</button></div>
     <div class="stats" id="pauseStats"></div><p class="resume kb-only">Press P to resume</p></div></div>
 
   <div id="tactics" class="overlay hidden"></div>
