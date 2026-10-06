@@ -87,7 +87,6 @@ button.small, .row button { padding: 8px 16px; font-size: 14px; }
 #pens i.miss { background: #ff4d3d; border-color: #ff4d3d; }
 #toast { position: absolute; top: 38%; left: 50%; transform: translate(-50%, 0); font-size: 30px; font-weight: 900; font-style: italic; letter-spacing: .1em; color: #fff; text-shadow: 0 3px 14px rgba(0,0,0,.8); opacity: 0; transition: opacity .2s; }
 #toast.show { opacity: 1; }
-#autoBadge { top: 112px; }
 #powers { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; }
 .powerWrap { width: 220px; height: 12px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; overflow: hidden; opacity: 0; transition: opacity .15s; }
 .powerWrap.on { opacity: 1; }
@@ -641,3 +640,8 @@ body.nokb #replay .tag { font-size: 13px; padding: 4px 8px; top: 4px; left: 8px;
 body.nokb #replay .tag button { min-height: 28px; padding: 0 10px; font-size: 12px; }
 body.nokb #touchHint { font-size: 10px; max-width: 54vw; bottom: 20%; }
 body.nokb:has(#events:not(.hidden)) #commentary { visibility: hidden; } /* the events list takes the commentary's place on a phone */
+
+/* The autopilot badge sits at the right edge under the round buttons (not over the score widget and its events list), and steps aside during a replay */
+#autoBadge { top: calc(124px * var(--ui)); left: auto; right: 14px; transform: none; transform-origin: top right; }
+body.nokb #autoBadge { top: calc(46px * var(--ui)); right: calc(8px + env(safe-area-inset-right)); }
+body:has(#replay:not(.hidden)) #autoBadge { display: none; }

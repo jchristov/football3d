@@ -67,3 +67,9 @@ test('the touch buttons have no sprint button any more and fit the corner', () =
   for (const a of ['shoot', 'pass', 'tackle', 'swap', 'curl']) assert.match(t, new RegExp(`action: '${a}'`));
   assert.match(read('src/style.css'), /--tbu: calc\(clamp\(34px, 9\.5vh, 46px\)/);
 });
+
+test('the autopilot badge sits at the right edge and steps aside during a replay', () => {
+  const css = read('src/style.css');
+  assert.match(css, /#autoBadge \{ top: calc\(124px \* var\(--ui\)\); left: auto; right: 14px;/);
+  assert.match(css, /body:has\(#replay:not\(\.hidden\)\) #autoBadge \{ display: none; \}/);
+});
