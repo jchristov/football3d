@@ -115,13 +115,13 @@ export function pickKits(t0, t1) {
 
 // CPU skill: chosen difficulty adjusted by the team rating (1-5, 3 = neutral)
 export function makeDiff(diffKey, rating = 3) {
-  const d = DIFFS[diffKey], k = rating - 3;
+  const d = DIFFS[diffKey] || DIFFS.normal, k = rating - 3;
   return {
     ...d,
-    speed: d.speed + k * 0.025,
+    speed: Math.max(0.45, d.speed + k * 0.025),
     react: Math.max(0.08, d.react * (1 - k * 0.1)),
-    save: Math.min(0.92, d.save + k * 0.05),
-    tackle: Math.min(0.9, d.tackle + k * 0.05),
+    save: Math.max(0.05, Math.min(0.92, d.save + k * 0.05)),
+    tackle: Math.max(0, Math.min(0.9, d.tackle + k * 0.05)),
     shootRange: d.shootRange + k * 0.8,
   };
 }

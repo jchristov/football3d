@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { buildWorld } from './world.js';
 import { Environment } from './env.js';
-import { Game } from './game.js';
+import { Game, CAMERA_LABEL } from './game.js';
 import { Hud } from './hud.js';
 import { Input } from './input.js';
 import { Sfx } from './audio.js';
@@ -12,6 +12,7 @@ import { TouchControls } from './touch.js';
 import { applyDevice, touchWanted, phoneFactor, panelZoom } from './device.js';
 import { FS_ENTER, FS_EXIT } from './icons.js';
 import { bindMouse } from './mouse.js';
+import { bindTapSelect } from './tapselect.js';
 import { TacticsUI } from './tacticsui.js';
 import { SquadUI } from './squadui.js';
 import { HelpUI } from './helpui.js';
@@ -109,7 +110,12 @@ game.onHalftime = () => tacticsUI.show({ halftime: true });
 const padNav = new PadNav(input, menu, settingsUI);
 // Touch: the on-screen stick and buttons appear on touch devices, and on any device at the first touch
 let touchControls = null;
-const enableTouch = () => { touchControls ||= new TouchControls(input, document.getElementById('hud')); };
+const enableTouch = () => {
+  if (touchControls) return;
+  touchControls = new TouchControls(input, document.getElementById('hud'));
+  touchControls.onTap = (x, y) => game.selectByTouch(x, y);
+};
+bindTapSelect(canvas, (x, y) => game.selectByTouch(x, y)); // tap a player of your team on the pitch to control him
 if (touchWanted()) enableTouch();
 window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') enableTouch(); }, { passive: true });
 // Which touch buttons matter right now: with the ball (shoot, pass) or without it (tackle, switch)
@@ -208,7 +214,7 @@ const refreshPause = () => {
   const solo = game.mode === '1p' && !game.rules.so;
   $id('pauseAuto').disabled = !solo;
   $id('pauseAuto').classList.toggle('on', game.autopilot);
-  $id('pauseCamera').textContent = `🎥 Camera: ${game.camModes[game.camMode] || ''}`;
+  $id('pauseCamera').textContent = `🎥 ${CAMERA_LABEL[game.camModes[game.camMode]] || 'Camera'}`;
   clearTimeout(quitTimer); quitBtn.textContent = QUIT_LABEL; quitBtn.classList.remove('armed');
 };
 const showPause = hud.showPause.bind(hud);
@@ -275,7 +281,7 @@ function frame(now) {
   checkPerformance(dt);
   game.update(dt);
   canvas.classList.toggle('aim', game.mouseOn);
-  touchControls?.setContext(touchContext());
+  if (touchControls) { touchControls.setContext(touchContext()); touchControls.root.querySelector('.auto')?.classList.toggle('on', !!game.autopilot); }
   padNav.update();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

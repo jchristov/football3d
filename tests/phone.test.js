@@ -65,7 +65,7 @@ test('the touch buttons have no sprint button any more and fit the corner', () =
   const t = read('src/touch.js');
   assert.doesNotMatch(t, /action: 'sprint'/);
   for (const a of ['shoot', 'pass', 'tackle', 'swap', 'curl']) assert.match(t, new RegExp(`action: '${a}'`));
-  assert.match(read('src/style.css'), /--tbu: calc\(clamp\(34px, 9\.5vh, 46px\)/);
+  assert.match(read('src/style.css'), /--tbu: calc\(clamp\(42px, 12vh, 58px\)/);
 });
 
 test('the autopilot badge sits at the right edge and steps aside during a replay', () => {
@@ -78,6 +78,7 @@ test('the round buttons form one row in the top-right corner; the full-screen bu
   const css = read('src/style.css');
   const right = (id) => Number(new RegExp(`#${id} \\{ position: fixed; top: 14px; right: (\\d+)px`).exec(css)[1]);
   assert.deepEqual(['muteBtn', 'fsBtn', 'hudSettings', 'hudTeam'].map(right), [14, 68, 122, 176], 'same top, 54 px apart');
+  assert.doesNotMatch(css, /body\.nokb #hudSettings \{ display: none/, 'settings stay reachable on a phone');
   const { FS_ENTER, FS_EXIT } = await import('../src/icons.js');
   assert.match(FS_ENTER, /^<svg/); assert.match(FS_EXIT, /^<svg/); assert.notEqual(FS_ENTER, FS_EXIT);
   assert.doesNotMatch(read('index.html'), /⛶|🗗/ , 'no emoji glyph for the full-screen button');

@@ -6,7 +6,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1226; f
 .hidden { display: none !important; }
 
 #hud { position: fixed; inset: 0; pointer-events: none; }
-#scorewrap { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+#scorewrap { position: absolute; top: 14px; left: 50%; width: max-content; translate: -50% 0; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
 #scoreboard { position: relative; display: flex; align-items: center; gap: 14px; padding: 8px 20px; background: rgba(8,14,34,calc(var(--pa) * 0.907)); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; backdrop-filter: blur(6px); font-weight: 700; letter-spacing: .06em; }
 #scoreboard b { font-size: 30px; min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
 #scoreboard .team { display: flex; align-items: center; gap: 8px; font-size: 14px; opacity: .92; }
@@ -587,10 +587,10 @@ body.nokb .kb-only { display: none !important; }
 body.nokb div.touch-only { display: block !important; }
 body.nokb button.touch-only { display: inline-flex !important; }
 body.nokb small.touch-only { display: inline !important; }
-body.touch { --tbu: calc(clamp(34px, 9.5vh, 46px) * var(--ts, 1)); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.touch { --tbu: calc(clamp(42px, 12vh, 58px) * var(--ts, 1)); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 body.touch input, body.touch textarea { -webkit-user-select: text; user-select: text; }
 body.touch #touch { left: env(safe-area-inset-left); right: env(safe-area-inset-right); bottom: env(safe-area-inset-bottom); }
-body.touch #touch .zone { width: 44vw; height: 68vh; }
+body.touch #touch .zone { width: 44vw; height: 72vh; }
 body.touch #touch .knob { width: 96px; height: 96px; margin: -48px 0 0 -48px; }
 body.touch #touch .knob i { width: 42px; height: 42px; margin: -21px 0 0 -21px; }
 body.touch #touch .tb { width: var(--tbu); height: var(--tbu); font-size: calc(var(--tbu) * .25); letter-spacing: -.02em; padding: 0; transition: opacity .2s, transform .15s, background .15s; background: rgba(8, 14, 34, .42); border-width: 2px; border-color: rgba(255, 255, 255, .4); }
@@ -608,12 +608,13 @@ body.touch #touch .knob.run i { background: rgba(125, 255, 181, .85); }
 #touchHint { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); max-width: 62vw; padding: 6px 12px; border-radius: 10px; background: rgba(8, 14, 34, .85); border: 1px solid rgba(255, 255, 255, .3); font-size: 11px; font-weight: 600; text-align: center; pointer-events: auto; animation: hintIn .3s ease-out; }
 @keyframes hintIn { from { opacity: 0; transform: translate(-50%, 8px); } }
 body.nokb #touch .mini { left: calc(8px + env(safe-area-inset-left)); top: 6px; gap: 6px; }
-body.nokb #touch .mini button { width: 32px; height: 32px; min-width: 0; min-height: 0; padding: 0; font-size: 13px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
-body.nokb #muteBtn, body.nokb #fsBtn, body.nokb #hudTeam { width: 32px; height: 32px; font-size: 14px; top: 6px; }
+body.nokb #touch .mini button.on { border-color: #ffd21e; background: rgba(255, 210, 30, .25); }
+body.nokb #touch .mini button { width: 38px; height: 38px; min-width: 0; min-height: 0; padding: 0; font-size: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+body.nokb #muteBtn, body.nokb #fsBtn, body.nokb #hudTeam, body.nokb #hudSettings { width: 38px; height: 38px; font-size: 16px; top: 6px; }
 body.nokb #muteBtn { right: calc(8px + env(safe-area-inset-right)); }
-body.nokb #fsBtn { right: calc(46px + env(safe-area-inset-right)); }
-body.nokb #hudTeam { right: calc(84px + env(safe-area-inset-right)); }
-body.nokb #hudSettings { display: none; } /* settings are in the pause menu */
+body.nokb #fsBtn { right: calc(52px + env(safe-area-inset-right)); }
+body.nokb #hudSettings { right: calc(96px + env(safe-area-inset-right)); }
+body.nokb #hudTeam { right: calc(140px + env(safe-area-inset-right)); }
 body.nokb #autoBadge { pointer-events: auto; cursor: pointer; }
 body.nokb #commentary { bottom: auto; top: calc(100px * var(--ui)); transform-origin: top center; max-width: 52vw; padding: 3px 10px; font-size: 11px; }
 body.nokb #commentary b { font-size: 12px; }
@@ -642,9 +643,9 @@ body.nokb:has(#events:not(.hidden)) #commentary { visibility: hidden; } /* the e
 
 /* The autopilot badge sits at the right edge under the round buttons (not over the score widget and its events list), and steps aside during a replay */
 #autoBadge { left: auto; right: 14px; transform: none; transform-origin: top right; }
-body.nokb #autoBadge { top: 42px; right: calc(8px + env(safe-area-inset-right)); }
+body.nokb #autoBadge { top: 50px; right: calc(8px + env(safe-area-inset-right)); }
 body:has(#replay:not(.hidden)) #autoBadge { display: none; }
 #pauseFs svg { width: 1.1em; height: 1.1em; vertical-align: -.15em; }
-body.nokb #fsBtn svg { width: 17px; height: 17px; }
+body.nokb #fsBtn svg { width: 19px; height: 19px; }
 /* the round buttons are one row in the top-right corner, the autopilot badge sits right under it */
 #autoBadge { top: 66px; }

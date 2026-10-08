@@ -2,6 +2,8 @@ import { GOAL, PITCH, clamp, attackDir } from './constants.js';
 import { settings } from './settings.js';
 import { RUN_AT } from './touch.js';
 
+const PICK_LOCK = 3; // seconds
+
 export const ACTIONS = ['up', 'down', 'left', 'right', 'sprint', 'shoot', 'curl', 'pass', 'tackle', 'swap'];
 export const ACTION_LABELS = {
   up: 'Move up', down: 'Move down', left: 'Move left', right: 'Move right', sprint: 'Sprint', shoot: 'Shoot (hold)',
@@ -12,7 +14,7 @@ export const SCHEME_LABELS = { solo: 'Single player', p1: 'Player 1', p2: 'Playe
 export const RESERVED = new Set(['KeyC', 'KeyP', 'KeyV', 'KeyT', 'KeyN', 'KeyM', 'KeyO', 'KeyB', 'KeyH', 'KeyU', 'KeyI', 'KeyG', 'KeyX', 'Escape']);
 // Global shortcuts shown in Settings and on the help screen (S is "move down" in the WASD scheme, so Settings is O)
 export const SHORTCUTS = [
-  ['C', 'Camera'], ['V', 'Instant replay'], ['T', 'Autopilot'], ['N', 'Commentary'], ['P / Esc', 'Pause'], ['M', 'Mute'],
+  ['C', 'Camera: broadcast, selected player, ball, bird\'s-eye'], ['V', 'Instant replay'], ['T', 'Autopilot'], ['N', 'Commentary'], ['P / Esc', 'Pause'], ['M', 'Mute'],
   ['B', 'Bird\'s-eye minimap'], ['H', 'This help screen'], ['O', 'Settings (options)'], ['U', 'Team changes: formation and substitutions'], ['I', 'Match events: goals, cards, substitutions'], ['G', 'Player bars: energy and speciality'], ['X', 'Full screen'], ['Space / Enter', 'Skip a replay'], ['Enter', 'Confirm menus'],
 ];
 
@@ -108,12 +110,23 @@ export class Controller {
     const mates = g.teams[this.team].filter((p) => !p.isGK);
     const dd = (p) => Math.hypot(p.pos.x - b.x, p.pos.z - b.z);
     if (!force && cur && g.ball.owner === cur && cur.stunT <= 0) return;
+    if (!force && cur && this.lockT > 0 && cur.stunT <= 0) return; // the player picked him by touch: no automatic switch for a moment
     let best = mates[0];
     for (const p of mates) if (dd(p) < dd(best)) best = p;
     if (!cur || force || cur.stunT > 0 || (best !== cur && dd(best) + 2.5 < dd(cur))) {
       if (cur) cur.charge = 0;
       this.player = best;
     }
+  }
+
+  // Take control of `p` (a tap on him); the automatic selection leaves him alone for a few seconds
+  pick(p) {
+    if (!p || p === this.player || p.isGK || p.team !== this.team) return false;
+    if (this.player) this.player.charge = 0;
+    this.player = p;
+    this.lockT = PICK_LOCK;
+    this.passHold = 0;
+    return true;
   }
 
   swap() {
@@ -158,7 +171,8 @@ export class Controller {
   update(dt) {
     const g = this.game, p = this.player, inp = g.input, k = this.keys;
     if (!p || !this.enabled) return;
-    if (inp.consume(...k.swap)) this.swap();
+    if (this.lockT > 0) this.lockT -= dt;
+    if (inp.consume(...k.swap)) { this.swap(); this.lockT = 0; }
 
     const mv = this.moveVector(), { dx, dz, l } = mv;
     const aim = this.mouseAim();

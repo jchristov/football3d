@@ -5,7 +5,7 @@ import { Tournament, TEAMS, squad } from './teams.js';
 // table. A win in a season makes the next one harder. Everything is saved after each match.
 const KEY = 'football3d.career';
 const store = () => (typeof localStorage !== 'undefined' ? localStorage : null);
-const DIFF_ORDER = ['easy', 'normal', 'hard'];
+const DIFF_ORDER = ['kids', 'beginner', 'easy', 'normal', 'hard', 'expert'];
 const MAX_FORM = 5;
 
 const line = () => ({ apps: 0, goals: 0, assists: 0, yellows: 0, reds: 0, ratings: [] });

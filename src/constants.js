@@ -52,11 +52,17 @@ export const REACH = 1.0;
 export const GRAVITY = 22;
 export const MATCH_TIME = 180;
 
+// CPU skill per level. `assist` is help for the human team (beginners): a larger reach for the ball, so first touches and
+// tackles land more easily, on top of a slow, passive CPU. `label` / `blurb` are shown in the menu.
 export const DIFFS = {
-  easy:   { speed: 0.84, react: 0.55, save: 0.38, shootRange: 11, aim: 0.22, tackle: 0.25 },
-  normal: { speed: 0.92, react: 0.32, save: 0.58, shootRange: 14, aim: 0.10, tackle: 0.45 },
-  hard:   { speed: 1.0, react: 0.16, save: 0.78, shootRange: 17, aim: 0.04, tackle: 0.70 },
+  kids:     { label: 'Kids', blurb: 'The CPU hardly moves or shoots, your touches are generous', speed: 0.58, react: 1.0, save: 0.12, shootRange: 6, aim: 0.45, tackle: 0.05, assist: 0.5 },
+  beginner: { label: 'Beginner', blurb: 'A slow, forgiving CPU; the ball sticks to your feet', speed: 0.68, react: 0.8, save: 0.22, shootRange: 8, aim: 0.34, tackle: 0.1, assist: 0.35 },
+  easy:     { label: 'Easy', blurb: 'A relaxed CPU, a little help with the ball', speed: 0.8, react: 0.55, save: 0.38, shootRange: 11, aim: 0.22, tackle: 0.22, assist: 0.15 },
+  normal:   { label: 'Normal', blurb: 'The standard game', speed: 0.92, react: 0.32, save: 0.58, shootRange: 14, aim: 0.10, tackle: 0.45, assist: 0 },
+  hard:     { label: 'Hard', blurb: 'A fast, clever CPU', speed: 1.0, react: 0.16, save: 0.78, shootRange: 17, aim: 0.04, tackle: 0.70, assist: 0 },
+  expert:   { label: 'Expert', blurb: 'A relentless CPU that hardly misses', speed: 1.06, react: 0.1, save: 0.86, shootRange: 19, aim: 0.02, tackle: 0.85, assist: 0 },
 };
+export const DIFF_KEYS = Object.keys(DIFFS);
 
 export const FORMATION = [
   { role: 'GK',  lx: 1.3,  lz: 0 },

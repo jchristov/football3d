@@ -19,7 +19,7 @@ export const makeDefaults = () => ({
   ttsVolume: 1,
   panelOpacity: 0.86, // opacity of every overlay panel (menu, settings, tactics, help ...), 0.3 - 1
   muted: false, // sound muted (M)
-  camera: 'broadcast', // the match camera: 'broadcast' | 'follow' | 'top' (C)
+  camera: 'broadcast', // the match camera: 'broadcast' | 'follow' (selected player) | 'ball' | 'top' (C)
   menu: { mode: '1p', comp: 'friendly', diff: 'normal', teamA: 0, teamB: 1, time: 'day', weather: 'clear', stadium: 'arena' }, // the choices on the start screen
   lineupScreen: true, // the team sheets before kick-off
   mouse: true, // mouse control: run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PITCH, GOAL, REACH, MATCH_TIME, BALL, SIDES, MATCH, TEAM_SIZES, setPitchForSize, clamp, angleDiff, attackDir, sc, sq } from './constants.js';
+import { DIFFS, PITCH, GOAL, REACH, MATCH_TIME, BALL, SIDES, MATCH, TEAM_SIZES, setPitchForSize, clamp, angleDiff, attackDir, sc, sq } from './constants.js';
 import { Ball } from './ball.js';
 import { Player } from './player.js';
 import { runAI, segDist } from './ai.js';
@@ -22,6 +22,8 @@ import { BALL_FACES, RANDOM_FACE } from './ballskin.js';
 
 const LOB_LIFT = 11.3;
 const LOB_TIME = 0.9;
+
+export const CAMERA_LABEL = { broadcast: 'Broadcast camera', follow: 'Following the selected player', ball: 'Following the ball', top: 'Bird\'s-eye view' };
 
 export class Game {
   constructor({ scene, camera, world, env, hud, sfx, input }) {
@@ -83,6 +85,7 @@ export class Game {
     this.score = [0, 0];
     this.clock = MATCH_TIME;
     this.aiDiff = [makeDiff('normal', 3), makeDiff('normal', 3)];
+    this.humanAssist = [0, 0];
     this.timer = 0;
     this.time = 0;
     this.excite = 0;
@@ -258,6 +261,7 @@ export class Game {
     this.score = [0, 0];
     this.clock = MATCH_TIME;
     this.aiDiff = [makeDiff('normal', TEAMS[teams[0]].rating), makeDiff('normal', TEAMS[teams[1]].rating)];
+    this.humanAssist = [0, 0];
     this.rules.reset();
     this.clearEvents();
     this.stats.reset();
@@ -301,6 +305,7 @@ export class Game {
     SIDES.flip = 1;
     const mateDiff = cfg.mode === '1p' || cfg.mode === '2p' ? 'normal' : cfg.diff;
     this.aiDiff = [makeDiff(mateDiff, TEAMS[cfg.teams[0]].rating), makeDiff(cfg.mode === '2p' ? 'normal' : cfg.diff, TEAMS[cfg.teams[1]].rating)];
+    this.humanAssist = [cfg.mode === '1p' ? (DIFFS[cfg.diff]?.assist || 0) : 0, 0]; // only in a 1-player match
     this.score = [0, 0];
     this.clock = cfg.length || MATCH_TIME;
     this.excite = 0;
@@ -660,7 +665,8 @@ export class Game {
         continue;
       }
 
-      const reach = (p.lungeT > 0 ? 1.5 : REACH) * (0.7 + BALL.r); // a smaller ball is a little harder to control
+      const assist = 1 + (this.humanAssist[p.team] || 0); // beginner levels: the ball sticks to the feet of the human team
+      const reach = (p.lungeT > 0 ? 1.5 : REACH) * (0.7 + BALL.r) * assist; // a smaller ball is a little harder to control
       const d = Math.hypot(b.pos.x - p.pos.x, b.pos.z - p.pos.z);
       if (d > reach || b.pos.y > 1.3 || p.kickCd > 0 || p.stunT > 0 || p.touchCd > 0) continue;
 
@@ -965,12 +971,7 @@ export class Game {
     if (inp.consume('KeyM')) { this.sfx.toggleMute(); if (typeof document !== 'undefined') document.getElementById('muteBtn')?.blur(); }
     if (inp.consume('KeyT')) this.toggleAutopilot();
     if (inp.consume('KeyN')) this.comm.toggle();
-    if (inp.consume('KeyC')) {
-      const n = this.camModes.length;
-      this.camMode = (this.camMode + 1) % n;
-      settings.camera = this.camModes[this.camMode];
-      saveSettings();
-    }
+    if (inp.consume('KeyC')) this.nextCamera();
     if (inp.consume('KeyP', 'Escape')) {
       if (this.state === 'replay') this.endReplay(); else this.togglePause();
     }
@@ -980,7 +981,38 @@ export class Game {
     }
   }
 
-  get camModes() { return this.mode === '2p' ? ['broadcast', 'top'] : ['broadcast', 'follow', 'top']; }
+  // A finger on the screen at (clientX, clientY): the player of the human team that is closest to it in the picture (within
+  // a fingertip) becomes the controlled one. Returns whether a player was hit.
+  selectByTouch(clientX, clientY) {
+    if (this.remote || this.attract || this.modal || this.state !== 'playing' || this.rules.so) return false;
+    const c = this.ctrls.find((k) => k.enabled && k.keys === SCHEMES.solo);
+    const r = this.pointerRect?.();
+    if (!c || !r || !r.width || !r.height) return false;
+    this.camera.updateMatrixWorld();
+    const reach = clamp(r.height * 0.13, 38, 72); // px
+    const v = new THREE.Vector3();
+    let best = null, bd = reach;
+    for (const p of this.teams[c.team]) {
+      if (p.isGK || p.dead) continue;
+      v.set(p.pos.x, 0.9, p.pos.z).project(this.camera);
+      if (v.z > 1) continue;
+      const d = Math.hypot(r.left + (v.x * 0.5 + 0.5) * r.width - clientX, r.top + (0.5 - v.y * 0.5) * r.height - clientY);
+      if (d < bd) { bd = d; best = p; }
+    }
+    if (!best) return false;
+    if (c.pick(best) && typeof navigator !== 'undefined') navigator.vibrate?.(10);
+    return true;
+  }
+
+  // C: broadcast -> follow the selected player -> follow the ball -> bird's eye
+  nextCamera() {
+    this.camMode = (this.camMode + 1) % this.camModes.length;
+    settings.camera = this.camModes[this.camMode];
+    saveSettings();
+    this.hud.toast?.(`🎥 ${CAMERA_LABEL[settings.camera]}`, 1100);
+  }
+
+  get camModes() { return this.mode === '2p' ? ['broadcast', 'ball', 'top'] : ['broadcast', 'follow', 'ball', 'top']; }
 
   update(dtRaw) {
     const dt = Math.min(dtRaw, 0.05);
@@ -1085,7 +1117,7 @@ export class Game {
     if (!this.modal) {
       if (inp.consume('KeyM')) { this.sfx.toggleMute(); if (typeof document !== 'undefined') document.getElementById('muteBtn')?.blur(); }
       if (inp.consume('KeyN')) this.comm.toggle();
-      if (inp.consume('KeyC')) { this.camMode = (this.camMode + 1) % this.camModes.length; settings.camera = this.camModes[this.camMode]; saveSettings(); }
+      if (inp.consume('KeyC')) this.nextCamera();
       if (inp.consume('KeyP', 'Escape', 'KeyV', 'KeyT')) this.hud.toast('Only the host can do that', 1200);
     } else inp.pressed.clear();
     this.updateMouse();
@@ -1159,10 +1191,11 @@ export class Game {
       pos = new THREE.Vector3(sp.S.x - sp.d * 14 * zoom, 6.6 * zoom, 0);
       look = new THREE.Vector3(sp.G.x, 1.2, 0);
       fwd = { x: sp.d, z: 0 };
-    } else if (mode === 'follow') {
-      const p = this.ctrls[0]?.player;
+    } else if (mode === 'follow' || mode === 'ball') {
+      // 'follow' keeps the selected player in the middle, 'ball' the ball (also when nobody is selected)
+      const p = mode === 'follow' ? this.ctrls[0]?.player : null;
       const fx = p ? p.pos.x : b.x, fz = p ? p.pos.z : b.z;
-      const fd = p ? attackDir(p.team) : 1;
+      const fd = attackDir(p ? p.team : (this.ctrls[0]?.team ?? 0));
       pos = new THREE.Vector3(fx - 15 * zoom * fd, 9 * zoom, fz * 0.75);
       look = new THREE.Vector3(fx + 7 * fd, 0.5, fz * 0.8);
       fwd = { x: fd, z: 0 };

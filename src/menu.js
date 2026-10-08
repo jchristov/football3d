@@ -5,7 +5,7 @@ import { settings, onSettings } from './settings.js';
 import { buildBallPicker, buildBallSizePicker } from './ballpicker.js';
 import { settings as S, saveSettings } from './settings.js';
 import { formationsFor, resolveFormation, PRESS, PRESS_KEYS } from './tactics.js';
-import { TEAM_SIZES } from './constants.js';
+import { TEAM_SIZES, DIFFS, DIFF_KEYS } from './constants.js';
 import { tint, tn } from './teamcolor.js';
 import { styleByKey } from './styles.js';
 
@@ -13,7 +13,7 @@ const $ = (id) => document.getElementById(id);
 const hex = (n) => '#' + n.toString(16).padStart(6, '0');
 const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
 const pickRandom = (list) => list[Math.floor(Math.random() * list.length)];
-const CHOICES = { mode: ['1p', '2p', 'cpu', 'online'], comp: ['friendly', 'cup', 'league', 'career'], diff: ['easy', 'normal', 'hard'], time: ['day', 'dusk', 'night', 'random'], weather: ['clear', 'rain', 'snow', 'mud', 'wind', 'random'], stadium: ['arena', 'classic', 'neon', 'random'] };
+const CHOICES = { mode: ['1p', '2p', 'cpu', 'online'], comp: ['friendly', 'cup', 'league', 'career'], diff: DIFF_KEYS, time: ['day', 'dusk', 'night', 'random'], weather: ['clear', 'rain', 'snow', 'mud', 'wind', 'random'], stadium: ['arena', 'classic', 'neon', 'random'] };
 
 // The start-screen choices as saved in the settings, with anything unknown replaced by the default
 export function cleanMenuChoices(saved = {}) {
@@ -125,7 +125,8 @@ export class Menu {
     };
     row('modeRow', 'mode', 'mode', () => { if (this.sel.mode === 'online' && !this.netUI?.connected) this.netUI?.show(); });
     row('compRow', 'comp', 'comp');
-    row('diffRow', 'diff', 'diff');
+    $('diffRow').innerHTML = DIFF_KEYS.map((k) => `<button data-diff="${k}" title="${DIFFS[k].blurb}">${DIFFS[k].label}</button>`).join('');
+    row('diffRow', 'diff', 'diff', () => this.showDiffBlurb());
     row('timeRow', 'time', 'time', () => this.previewEnv());
     row('weatherRow', 'weather', 'weather', () => this.previewEnv());
     row('stadiumRow', 'stadium', 'stadium', () => this.previewEnv());
@@ -143,6 +144,7 @@ export class Menu {
     mark('modeRow', 'mode', s.mode);
     mark('compRow', 'comp', s.comp);
     mark('diffRow', 'diff', s.diff);
+    this.showDiffBlurb();
     mark('timeRow', 'time', s.time);
     mark('weatherRow', 'weather', s.weather);
     mark('stadiumRow', 'stadium', s.stadium);
@@ -161,6 +163,8 @@ export class Menu {
     document.body.classList.toggle('two', s.mode === '2p');
     if (JSON.stringify(settings.menu) !== JSON.stringify(s)) { settings.menu = { ...s }; saveSettings(); }
   }
+
+  showDiffBlurb() { const el = $('diffBlurb'); if (el) el.textContent = DIFFS[this.sel.diff]?.blurb || ''; }
 
   resolveEnv() {
     const { time, weather, stadium } = this.sel;
