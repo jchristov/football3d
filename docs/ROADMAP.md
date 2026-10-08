@@ -24,6 +24,21 @@ Status: ☐ planned · ◐ in progress · ☑ done.
 | P17 | Season / career mode | L | ☑ | Several matches with a persistent squad, top scorers and a form guide. |
 | – | P2P online match | L | ☑ | Two-player match over WebRTC with manual code exchange; host-authoritative simulation, guest renders snapshots (done on request). |
 
+## Added on request (not part of the priority list)
+| Feature | Notes |
+|---------|-------|
+| Mouse control | Run to the pointer, click to shoot / pass / tackle, wheel to switch player. |
+| Phone and tablet interface | Detects keyboard-less devices: compact panels and HUD, a floating stick (edge = sprint), context-aware buttons, tap a player to control him, a pause menu with Resume, no shortcut hints. |
+| Join by QR code / link | Room and invitation links with QR codes, network addresses from the game server. |
+| Online rooms (relay) | `npm run dev` / `preview` serve rooms for the same network; static hosting only has invitation codes. |
+| Six difficulty levels | Kids, Beginner, Easy, Normal, Hard, Expert; Kids and Beginner also make the ball easier to get. |
+| Ball-following camera | `C` cycles broadcast, selected player, ball, bird's-eye. |
+| One button size system | 44 px text buttons, 34 px dense controls, round icon buttons; a test guards it. |
+| Hosting | GitHub Pages deployment from `main` (tests, build, deploy) – https://jchristov.github.io/football3d/ |
+
+## Still open
+P11 team editor and P13 practice mode / tutorial.
+
 ## Why this order
 1. P1–P4 build directly on the speciality bars, the cards and the match log that already exist.
 2. P5–P8 are small and improve every match (injuries, announcer, accessibility, installability).

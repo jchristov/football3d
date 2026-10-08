@@ -172,7 +172,18 @@ src/
   ballfaces.js, ballfaces2.js, ballfx.js   the 21 face designs and shading helpers
   audio.js     sound effects, crowd recordings, rain
   input.js     keyboard handling
-  constants.js tunables
+  constants.js tunables, difficulty levels
+  settings.js, settings-ui.js   saved settings and the Settings panel
+  menu.js, career.js, careerui.js   start screen, cups / leagues, career mode and its screens
+  net/         online play: WebRTC and room links, host / guest sessions, snapshots, QR / link sharing (share.js)
+  touch.js, tapselect.js, device.js, mouse.js   touch controls (stick, buttons, tap a player), phone detection, mouse control
+  ratings.js, analysis.js, stats.js   player ratings, heat / shot / pass maps, match statistics
+  skills.js, styles.js   speciality effects and CPU play styles
+  icons.js, helpui.js, lineupui.js, padnav.js, perf.js, recorder.js   icons, help screen, team sheets, gamepad menus, auto quality, replay video clips
+server/relay.js   room relay and network addresses for `npm run dev` / `preview`
+public/       web manifest, service worker, icons, crowd audio
+tests/        node --test unit and simulation tests (npm test)
+docs/ROADMAP.md   feature roadmap and what was added on request
 ```
 
 Crowd recordings: see [CREDITS.md](./CREDITS.md).
