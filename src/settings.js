@@ -23,6 +23,7 @@ export const makeDefaults = () => ({
   menu: { mode: '1p', comp: 'friendly', diff: 'normal', teamA: 0, teamB: 1, time: 'day', weather: 'clear', stadium: 'arena' }, // the choices on the start screen
   lineupScreen: true, // the team sheets before kick-off
   mouse: true, // mouse control: run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch
+  cpuToughness: 2, // how tough the CPU opponent plays in a 1-player match, 1 (very easy) - 5 (relentless)
   restarts: true, // throw-ins, corners and goal kicks (off: the ball bounces off the boards)
   autoQuality: true, // lower the graphics quality automatically when the frame rate is poor
   colorBlind: false, // colour-blind-safe palette for the speciality bars and the cards
@@ -39,7 +40,7 @@ export const makeDefaults = () => ({
   minimap: true, // the bird's-eye minimap in the bottom-right corner (B)
   offside: false, // optional offside rule
   tactics: { formation: 'balanced', press: 'balanced' }, // the human team's default tactics
-  custom: {}, // squad editor overrides: { 'team-slot': { name, skin, hair, style, beard, boots } }
+  custom: {}, // squad editor overrides: { 'team-slot': { name, skin, hair, style, beard, boots, eyes } }
   bindings: {}, // { solo|p1|p2: { action: [KeyboardEvent.code, ...] } } — only the user's overrides
 });
 export const DEFAULTS = makeDefaults();
@@ -79,5 +80,7 @@ loadSettings();
 
 // Accessibility helpers (pure, so they can be tested)
 export const clampTouchScale = (v) => Math.min(1.4, Math.max(0.6, Number(v) || 1));
+export const CPU_TOUGHNESS = ['Very easy', 'Easy', 'Normal', 'Hard', 'Relentless'];
+export const clampToughness = (v) => Math.min(5, Math.max(1, Math.round(Number(v)) || 2));
 export const clampUiScale = (v) => Math.min(1.5, Math.max(0.8, Number(v) || 1));
 export const motionReduced = (s = settings, systemPrefers = false) => (s.reducedMotion === null || s.reducedMotion === undefined ? !!systemPrefers : !!s.reducedMotion);

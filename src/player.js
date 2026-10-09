@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { PITCH, clamp, angleDiff } from './constants.js';
 import { shirtTexture, backTexture, frontTexture } from './kit.js';
 import { hairGeometry, beardGeometry } from './hair.js';
-import { skinHex, hairHex, bootHex, defaultLook } from './appearance.js';
+import { skinHex, hairHex, bootHex, eyeHex, defaultLook } from './appearance.js';
 const BASE_SPEED = 6.4;
 export const FATIGUE_MIN = 0.86; // speed factor of a completely drained player
 const SPRINT_DRAIN = 0.26, SPRINT_REGEN = 0.12;
@@ -53,7 +53,14 @@ const G = {
   head: new THREE.SphereGeometry(0.17, 20, 16),
   cap: new THREE.SphereGeometry(0.182, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.52),
   afro: new THREE.SphereGeometry(0.23, 14, 12),
-  eye: new THREE.SphereGeometry(0.022, 8, 6),
+  eye: new THREE.SphereGeometry(0.03, 10, 8),
+  iris: new THREE.SphereGeometry(0.019, 10, 8),
+  pupil: new THREE.SphereGeometry(0.009, 6, 6),
+  ear: new THREE.SphereGeometry(0.04, 8, 6),
+  nose: new THREE.SphereGeometry(0.03, 8, 6),
+  mouth: new THREE.BoxGeometry(0.07, 0.012, 0.012),
+  shoulderCap: new THREE.SphereGeometry(0.088, 12, 8),
+  yoke: new THREE.CylinderGeometry(0.072, 0.072, 0.6, 10),
   sleeve: new THREE.CylinderGeometry(0.075, 0.07, 0.19, 10),
   upperArm: new THREE.CylinderGeometry(0.058, 0.052, 0.3, 8),
   foreArm: new THREE.CylinderGeometry(0.05, 0.043, 0.28, 8),
@@ -62,7 +69,8 @@ const G = {
 };
 
 const SOLE_MAT = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.6 });
-const EYE_MAT = new THREE.MeshBasicMaterial({ color: 0x111111 });
+const EYE_MAT = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
+const EYE_WHITE = new THREE.MeshBasicMaterial({ color: 0xf2f2ee });
 const GLOVE_MAT = new THREE.MeshStandardMaterial({ color: 0xf2f2f2, roughness: 0.6 });
 
 const INJURED_SPEED = 0.6; // pace of a player who is playing on with an injury
@@ -104,6 +112,8 @@ export class Player {
       shirt: std({}), sleeve: std({}), shorts: std({}), sock: std({}), trim: std({}),
       skin: std({ color: 0xd29a68, roughness: 0.6 }),
       hair: std({ color: 0x2e1d12, roughness: 0.85 }),
+      iris: new THREE.MeshBasicMaterial({ color: 0x5a3a1e }),
+      lip: std({ color: 0x8a3b3b, roughness: 0.6 }),
       stubble: std({ color: 0x2e1d12, roughness: 0.9, transparent: true, opacity: 0.5, depthWrite: false }),
       boot: std({ color: 0x15161a, roughness: 0.5 }),
       band: std({ color: 0xffd21e, roughness: 0.6 }),
@@ -152,13 +162,21 @@ export class Player {
     const head = this.head = group(0, 0.8, 0, upper);
     add(G.head, m.skin, 0, 0.16, 0, head).scale.y = 1.1;
     this.hairGroup = group(0, 0, 0, head); // hair, facial hair and headband live here and are swapped by setLook()
-    add(G.eye, EYE_MAT, -0.06, 0.18, 0.155, head);
-    add(G.eye, EYE_MAT, 0.06, 0.18, 0.155, head);
+    for (const x of [-1, 1]) {
+      const eye = add(G.eye, EYE_WHITE, x * 0.06, 0.18, 0.14, head);
+      eye.scale.set(1, 0.8, 0.55);
+      add(G.iris, m.iris, x * 0.06, 0.18, 0.162, head).scale.set(1, 1, 0.4);
+      add(G.pupil, EYE_MAT, x * 0.06, 0.18, 0.169, head).scale.z = 0.4;
+      add(G.ear, m.skin, x * 0.168, 0.15, -0.005, head).scale.set(0.45, 1.15, 0.8);
+    }
+    add(G.nose, m.skin, 0, 0.125, 0.165, head).scale.set(0.8, 1.15, 1);
+    add(G.mouth, m.lip, 0, 0.065, 0.15, head);
 
     const arm = (x) => {
       const sh = group(x, 0.66, 0, upper);
       add(G.upperArm, m.skin, 0, -0.15, 0, sh);
       add(G.sleeve, m.sleeve, 0, -0.1, 0, sh);
+      add(G.shoulderCap, m.sleeve, 0, -0.005, 0, sh);
       const el = group(0, -0.3, 0, sh);
       const fore = add(G.foreArm, m.skin, 0, -0.14, 0, el);
       const longSleeve = add(G.foreArm, m.sleeve, 0, -0.14, 0, el);
@@ -167,6 +185,7 @@ export class Player {
       const hand = add(G.hand, m.skin, 0, -0.3, 0, el);
       return { sh, el, fore, longSleeve, hand };
     };
+    add(G.yoke, m.sleeve, 0, 0.655, 0, upper).rotation.z = Math.PI / 2;
     const aL = arm(-0.34), aR = arm(0.34);
     this.shL = aL.sh; this.elL = aL.el; this.shR = aR.sh; this.elR = aR.el;
     this.armband = add(new THREE.CylinderGeometry(0.082, 0.082, 0.05, 12), m.band, 0, -0.13, 0, aL.sh);
@@ -182,6 +201,7 @@ export class Player {
     this.appearance = look;
     const m = this.mats;
     m.skin.color.setHex(skinHex(look.skin));
+    m.iris.color.setHex(eyeHex(look.eyes));
     m.hair.color.setHex(hairHex(look.hair));
     m.stubble.color.setHex(hairHex(look.hair));
     m.boot.color.setHex(bootHex(look.boots));

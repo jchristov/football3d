@@ -25,6 +25,12 @@ export const HAIR_COLORS = [
 export const HAIR_STYLES = ['buzz', 'short', 'side', 'curly', 'afro', 'long', 'ponytail', 'braids', 'mohawk', 'bald', 'headband'];
 export const STYLE_LABELS = { buzz: 'Buzz cut', short: 'Short', side: 'Side part', curly: 'Curly', afro: 'Afro', long: 'Long', ponytail: 'Ponytail', braids: 'Braids', mohawk: 'Mohawk', bald: 'Bald', headband: 'Headband' };
 
+export const EYE_COLORS = [
+  { key: 'brown', label: 'Brown', hex: 0x6b4423 }, { key: 'darkbrown', label: 'Dark brown', hex: 0x3a2214 },
+  { key: 'hazel', label: 'Hazel', hex: 0x8e6b2e }, { key: 'green', label: 'Green', hex: 0x4f8a4b },
+  { key: 'blue', label: 'Blue', hex: 0x4a84c4 }, { key: 'grey', label: 'Grey', hex: 0x8a9aa6 },
+];
+
 export const BEARDS = ['none', 'stubble', 'moustache', 'beard'];
 export const BEARD_LABELS = { none: 'Clean shaven', stubble: 'Stubble', moustache: 'Moustache', beard: 'Full beard' };
 
@@ -104,7 +110,11 @@ function roll(teamIdx, slot, attempt) {
   const b = P.beard;
   const beard = weighted(r, [['none', 1 - b], ['stubble', b * 0.45], ['moustache', b * 0.2], ['beard', b * 0.35]]);
   const boots = weighted(r, BOOT_COLORS.map((c, i) => [c.key, [3, 2, 1, 0.8, 0.8, 0.5, 0.5, 1][i]]));
-  return { skin, hair: style === 'bald' ? 'black' : hair, style, beard, boots };
+  // drawn last so the rest of every generated look stays exactly as it was; light skin and fair hair make light eyes likelier
+  const fair = ['blonde', 'platinum', 'darkblonde', 'ginger', 'white', 'grey'].includes(hair) ? 1 : 0;
+  const light = (1 - dark) * (0.6 + fair * 1.2);
+  const eyes = weighted(r, [['darkbrown', 2 + dark * 5], ['brown', 3 + dark * 3], ['hazel', 1 + light], ['green', 0.2 + light * 1.1], ['blue', 0.3 + light * 2.4], ['grey', 0.2 + light * 0.7]]);
+  return { skin, hair: style === 'bald' ? 'black' : hair, style, beard, boots, eyes };
 }
 
 export const signature = (l) => `${l.skin}|${l.style === 'bald' ? '-' : l.hair}|${l.style}|${l.beard}|${l.boots}`;
@@ -143,10 +153,12 @@ export function lookFor(teamIdx, slot) {
   if (valid(o.style, HAIR_STYLES)) look.style = o.style;
   if (valid(o.beard, BEARDS)) look.beard = o.beard;
   if (valid(o.boots, BOOT_COLORS)) look.boots = o.boots;
+  if (valid(o.eyes, EYE_COLORS)) look.eyes = o.eyes;
   return look;
 }
 
 export const hairHex = (key) => (HAIR_COLORS.find((c) => c.key === key) || HAIR_COLORS[0]).hex;
+export const eyeHex = (key) => (EYE_COLORS.find((c) => c.key === key) || EYE_COLORS[0]).hex;
 export const bootHex = (key) => (BOOT_COLORS.find((c) => c.key === key) || BOOT_COLORS[0]).hex;
 
 // Same shape for the editor: a random look (not tied to the generated table)

@@ -1,7 +1,7 @@
 import { TEAMS, squad, pickKits } from './teams.js';
 import { settings, saveSettings } from './settings.js';
 import {
-  SKIN_TONES, SKIN_MAX, skinHex, HAIR_COLORS, HAIR_STYLES, STYLE_LABELS, BEARDS, BEARD_LABELS, BOOT_COLORS,
+  SKIN_TONES, SKIN_MAX, skinHex, HAIR_COLORS, HAIR_STYLES, STYLE_LABELS, BEARDS, BEARD_LABELS, BOOT_COLORS, EYE_COLORS,
   defaultLook, randomLook, cleanName, SLOTS, SLOT_ROLES,
 } from './appearance.js';
 import { LookPreview } from './lookpreview.js';
@@ -81,6 +81,7 @@ export class SquadUI {
           <div class="field">Hair colour <div class="sws">${sw(HAIR_COLORS, 'hair', look.hair)}</div></div>
           <div class="field">Hairstyle <div class="opts">${opt(HAIR_STYLES, STYLE_LABELS, 'style', look.style)}</div></div>
           <div class="field">Facial hair <div class="opts">${opt(BEARDS, BEARD_LABELS, 'beard', look.beard)}</div></div>
+          <div class="field">Eye colour <div class="sws">${sw(EYE_COLORS, 'eyes', look.eyes)}</div></div>
           <div class="field">Boots <div class="sws">${sw(BOOT_COLORS, 'boots', look.boots)}</div></div>
           <div class="opts">
             <button id="sqRandom">🎲 Randomise</button><button id="sqResetP">Reset player</button><button id="sqResetT">Reset team</button>
@@ -109,9 +110,10 @@ export class SquadUI {
     r.querySelectorAll('[data-hair]').forEach((b) => { b.onclick = () => this.edit({ hair: b.dataset.hair }); });
     r.querySelectorAll('[data-style]').forEach((b) => { b.onclick = () => this.edit({ style: b.dataset.style }); });
     r.querySelectorAll('[data-beard]').forEach((b) => { b.onclick = () => this.edit({ beard: b.dataset.beard }); });
+    r.querySelectorAll('[data-eyes]').forEach((b) => { b.onclick = () => this.edit({ eyes: b.dataset.eyes }); });
     r.querySelectorAll('[data-boots]').forEach((b) => { b.onclick = () => this.edit({ boots: b.dataset.boots }); });
     r.querySelector('#sqName').oninput = (e) => this.editName(e.target.value);
-    r.querySelector('#sqRandom').onclick = () => { const l = randomLook(this.team); this.edit({ skin: l.skin, hair: l.hair, style: l.style, beard: l.beard, boots: l.boots }); };
+    r.querySelector('#sqRandom').onclick = () => { const l = randomLook(this.team); this.edit({ skin: l.skin, hair: l.hair, style: l.style, beard: l.beard, boots: l.boots, eyes: l.eyes }); };
     r.querySelector('#sqResetP').onclick = () => { delete settings.custom[`${this.team}-${this.slot}`]; this.commit(); };
     r.querySelector('#sqResetT').onclick = () => { for (let s = 0; s < SLOTS; s++) delete settings.custom[`${this.team}-${s}`]; this.commit(); };
     const big = r.querySelector('#sqBig');

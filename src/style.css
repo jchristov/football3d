@@ -587,7 +587,7 @@ body.nokb .kb-only { display: none !important; }
 body.nokb div.touch-only { display: block !important; }
 body.nokb button.touch-only { display: inline-flex !important; }
 body.nokb small.touch-only { display: inline !important; }
-body.touch { --tbu: calc(clamp(42px, 12vh, 58px) * var(--ts, 1)); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.touch { --tbu: calc(clamp(52px, 15vh, 74px) * var(--ts, 1)); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 body.touch input, body.touch textarea { -webkit-user-select: text; user-select: text; }
 body.touch #touch { left: env(safe-area-inset-left); right: env(safe-area-inset-right); bottom: env(safe-area-inset-bottom); }
 body.touch #touch .zone { width: 44vw; height: 72vh; }

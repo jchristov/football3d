@@ -1,4 +1,4 @@
-import { settings, saveSettings, resetSettings } from './settings.js';
+import { settings, saveSettings, resetSettings, CPU_TOUGHNESS, clampToughness } from './settings.js';
 import { buildBallPicker, buildBallSizePicker } from './ballpicker.js';
 import { ACTIONS, ACTION_LABELS, SCHEME_LABELS, SHORTCUTS, keyboardKeys, keyLabel, rebind, resetBindings } from './controls.js';
 
@@ -75,6 +75,7 @@ export class SettingsUI {
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setRm" ${s.reducedMotion ?? (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'checked' : ''}> Reduce motion (no animations, no confetti, still crowd)</label></div>
       <h3>Match</h3>
       <div class="set-opts" id="setLength"><span>Friendly match length</span>${LENGTHS.map((l) => `<button data-l="${l}" class="${s.length === l ? 'on' : ''}">${l / 60} min</button>`).join('')}</div>
+      <div class="set-opts" id="setTough"><span title="How hard the CPU opponent plays in a 1-player match: its speed, reactions, tackling, shooting and goalkeeping">CPU toughness</span>${CPU_TOUGHNESS.map((l, i) => `<button data-t="${i + 1}" class="${clampToughness(s.cpuToughness) === i + 1 ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setComm" ${s.commentary ? 'checked' : ''}> Live text commentary</label></div>
       <div class="set-opts kb-only" style="margin-top:8px"><label><input type="checkbox" id="setMouse" ${s.mouse !== false ? 'checked' : ''}> Mouse control (run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch)</label></div>
       <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setRestarts" ${s.restarts !== false ? 'checked' : ''}> Throw-ins, corners and goal kicks (off: the ball bounces off the boards)</label></div>
@@ -120,6 +121,7 @@ export class SettingsUI {
     });
     r.querySelectorAll('#setQuality button').forEach((b) => { b.onclick = () => { settings.quality = b.dataset.q; saveSettings(); this.render(); }; });
     r.querySelectorAll('#setLength button').forEach((b) => { b.onclick = () => { settings.length = Number(b.dataset.l); saveSettings(); this.render(); }; });
+    r.querySelectorAll('#setTough button').forEach((b) => { b.onclick = () => { settings.cpuToughness = Number(b.dataset.t); saveSettings(); this.render(); }; });
     r.querySelector('#setTts').onchange = (e) => { settings.tts = e.target.checked; if (!settings.tts) this.speech?.stop(); saveSettings(); };
     r.querySelectorAll('input[data-tts]').forEach((el) => {
       el.oninput = () => {

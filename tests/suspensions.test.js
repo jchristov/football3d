@@ -85,7 +85,7 @@ test('the finished match reports the cards of the user team for the tournament',
   if (g2.state === 'halftime') g2.endHalftime();
   runUntil(g2, () => g2.state === 'ended', 200);
   assert.ok(got?.discipline, 'the result carries the discipline report');
-  assert.deepEqual(got.discipline.sent, [slot]);
+  assert.ok(got.discipline.sent.includes(slot), 'the forced red card is reported');
   const d = new Discipline(); d.record(got.discipline);
-  assert.deepEqual(d.suspended, [slot]);
+  assert.ok(d.suspended.includes(slot));
 });

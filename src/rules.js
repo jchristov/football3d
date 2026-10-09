@@ -59,7 +59,7 @@ export class Rules {
       foul = fromBehind && Math.random() < 0.5;
     } else {
       const toBall = Math.hypot(b.pos.x - tackler.pos.x, b.pos.z - tackler.pos.z);
-      foul = toBall > 1.7;
+      foul = b.owner !== tackler && toBall > 1.7; // a tackler who won the ball cannot have fouled for it
     }
     if (foul) this.foul(tackler, victim, { hadBall, fromBehind });
     return foul;

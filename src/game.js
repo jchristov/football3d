@@ -10,7 +10,7 @@ import { styleOfTeam, TEAMS, pickKits, makeDiff, squad } from './teams.js';
 import { Stats } from './stats.js';
 import { Commentary } from './commentary.js';
 import { Speech } from './speech.js';
-import { settings, saveSettings } from './settings.js';
+import { settings, saveSettings, clampToughness } from './settings.js';
 import { aptitude, tackleChance } from './skills.js';
 import { STYLES } from './styles.js';
 import { screenToGround, mouseActive } from './mouse.js';
@@ -304,7 +304,7 @@ export class Game {
     this.half = 1;
     SIDES.flip = 1;
     const mateDiff = cfg.mode === '1p' || cfg.mode === '2p' ? 'normal' : cfg.diff;
-    this.aiDiff = [makeDiff(mateDiff, TEAMS[cfg.teams[0]].rating), makeDiff(cfg.mode === '2p' ? 'normal' : cfg.diff, TEAMS[cfg.teams[1]].rating)];
+    this.aiDiff = [makeDiff(mateDiff, TEAMS[cfg.teams[0]].rating), makeDiff(cfg.mode === '2p' ? 'normal' : cfg.diff, TEAMS[cfg.teams[1]].rating, cfg.mode === '1p' ? clampToughness(cfg.toughness ?? settings.cpuToughness) : 3)];
     this.humanAssist = [cfg.mode === '1p' ? (DIFFS[cfg.diff]?.assist || 0) : 0, 0]; // only in a 1-player match
     this.score = [0, 0];
     this.clock = cfg.length || MATCH_TIME;
@@ -635,6 +635,7 @@ export class Game {
 
   contacts() {
     const b = this.ball;
+    const cands = [];
     for (const p of this.all) {
       if (p.lungeT > 0) {
         for (const o of this.all) {
@@ -669,26 +670,63 @@ export class Game {
       const reach = (p.lungeT > 0 ? 1.5 : REACH) * (0.7 + BALL.r) * assist; // a smaller ball is a little harder to control
       const d = Math.hypot(b.pos.x - p.pos.x, b.pos.z - p.pos.z);
       if (d > reach || b.pos.y > 1.3 || p.kickCd > 0 || p.stunT > 0 || p.touchCd > 0) continue;
-
-      p.touchCd = 0.2;
-      b.owner = p; b.lastToucher = p;
-      b.spin = 0;
-      this.stats.touch(p, this.time);
-      this.checkOffside(p);
-      if (this.state !== 'playing') return;
-      if (p.lungeT > 0) {
-        b.vel.set(Math.cos(p.lungeAngle) * 9, 0, Math.sin(p.lungeAngle) * 9);
-      } else {
-        const sp = p.speed;
-        if (sp < 0.8) { b.vel.x *= 0.5; b.vel.z *= 0.5; }
-        else {
-          const push = 1.8 + 0.2 * sp;
-          b.vel.x = p.vel.x + Math.cos(p.facing) * push;
-          b.vel.z = p.vel.z + Math.sin(p.facing) * push;
-        }
-        b.vel.y *= 0.3;
+      const o = b.owner;
+      if (o && o !== p && o.team !== p.team && p.lungeT <= 0 && o.stunT <= 0 && !b.held) {
+        if (!this.winBallFrom(p, o, d)) continue;
       }
+      cands.push({ p, d: d - (this.facingBall(p) ? 0.15 : 0) - (b.owner === p ? 0.3 : 0) });
     }
+    if (!cands.length) return;
+    cands.sort((x, y) => x.d - y.d);
+    this.takeBall(cands[0].p);
+  }
+
+  facingBall(p) {
+    const b = this.ball, dx = b.pos.x - p.pos.x, dz = b.pos.z - p.pos.z, l = Math.hypot(dx, dz) || 1;
+    return (Math.cos(p.facing) * dx + Math.sin(p.facing) * dz) / l > 0.3;
+  }
+
+  // A defender who is standing at the ball carrier has to win a small duel: a carrier who shields the ball with the body
+  // is hard to rob, one who runs straight into the defender or turns his back on the ball is easy prey.
+  winBallFrom(p, o, d) {
+    const b = this.ball;
+    const cx = b.pos.x - o.pos.x, cz = b.pos.z - o.pos.z, cl = Math.hypot(cx, cz) || 1;
+    const px = p.pos.x - o.pos.x, pz = p.pos.z - o.pos.z, pl = Math.hypot(px, pz) || 1;
+    const open = (cx * px + cz * pz) / (cl * pl); // 1: the defender is on the side of the ball, -1: the body is between
+    let chance = 0.3 * tackleChance(p, o) * (open > 0.2 ? 1.3 : open < -0.2 ? 0.25 : 0.6);
+    if (d > 0.9) chance *= 0.5;
+    if (o.speed > 5.5 && open < 0.5) chance *= 0.6; // a sprinter pushes the ball past the challenger
+    const human = this.ctrls.some((k) => k.enabled && k.player === p);
+    if (!human) chance *= Math.max(0.3, (this.aiDiff[p.team]?.tackle ?? 0.45) / 0.45);
+    chance /= 1 + (this.humanAssist[o.team] || 0) * 2;
+    p.touchCd = 0.35; // one attempt at a time, whatever the outcome
+    if (Math.random() < chance) {
+      this.rules.maybeInjure?.(o, 0.004);
+      return true;
+    }
+    return false;
+  }
+
+  takeBall(p) {
+    const b = this.ball, mine = b.owner === p;
+    p.touchCd = mine ? 0.09 : 0.2; // the carrier keeps nudging the ball, so it stays at his feet
+    b.owner = p; b.lastToucher = p;
+    b.spin = 0;
+    this.stats.touch(p, this.time);
+    this.checkOffside(p);
+    if (this.state !== 'playing') return;
+    if (p.lungeT > 0) {
+      b.vel.set(Math.cos(p.lungeAngle) * 9, 0, Math.sin(p.lungeAngle) * 9);
+      return;
+    }
+    const sp = p.speed;
+    if (sp < 0.8) { b.vel.x *= 0.5; b.vel.z *= 0.5; }
+    else {
+      const push = mine ? 1.3 + 0.2 * sp : 1.8 + 0.2 * sp; // a controlled dribble pushes the ball less far ahead
+      b.vel.x = p.vel.x + Math.cos(p.facing) * push;
+      b.vel.z = p.vel.z + Math.sin(p.facing) * push;
+    }
+    b.vel.y *= 0.3;
   }
 
   separate() {
@@ -697,9 +735,11 @@ export class Game {
       const p = a[i], q = a[j];
       const dx = q.pos.x - p.pos.x, dz = q.pos.z - p.pos.z, d = Math.hypot(dx, dz);
       if (d < 0.8 && d > 1e-4) {
-        const push = (0.8 - d) / 2, nx = dx / d, nz = dz / d;
-        p.pos.x -= nx * push; p.pos.z -= nz * push;
-        q.pos.x += nx * push; q.pos.z += nz * push;
+        const ob = this.ball.owner, dp = (0.8 - d), nx = dx / d, nz = dz / d;
+        // the ball carrier shoulders his opponent away instead of being pushed off the ball
+        const wp = ob === p && q.team !== p.team ? 0.3 : ob === q && q.team !== p.team ? 0.7 : 0.5;
+        p.pos.x -= nx * dp * wp; p.pos.z -= nz * dp * wp;
+        q.pos.x += nx * dp * (1 - wp); q.pos.z += nz * dp * (1 - wp);
       }
     }
   }

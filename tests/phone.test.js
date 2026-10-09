@@ -65,7 +65,7 @@ test('the touch buttons have no sprint button any more and fit the corner', () =
   const t = read('src/touch.js');
   assert.doesNotMatch(t, /action: 'sprint'/);
   for (const a of ['shoot', 'pass', 'tackle', 'swap', 'curl']) assert.match(t, new RegExp(`action: '${a}'`));
-  assert.match(read('src/style.css'), /--tbu: calc\(clamp\(42px, 12vh, 58px\)/);
+  assert.match(read('src/style.css'), /--tbu: calc\(clamp\(52px, 15vh, 74px\)/);
 });
 
 test('the autopilot badge sits at the right edge and steps aside during a replay', () => {

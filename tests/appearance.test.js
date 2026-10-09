@@ -90,3 +90,19 @@ test('every hairstyle and facial-hair type builds geometry', () => {
   for (const s of HAIR_STYLES) { const h = hairGeometry(s); if (s === 'bald') assert.equal(h.hair, null); else assert.ok(h.hair.attributes.position.count > 20, s); }
   for (const b of BEARDS) { const g = beardGeometry(b); if (b === 'none') assert.deepEqual(g, {}); else assert.ok(g.solid || g.stubble, b); }
 });
+
+test('every look has a valid eye colour, varied and linked to skin and hair', async () => {
+  const { EYE_COLORS, eyeHex } = await import('../src/appearance.js');
+  const all = [];
+  for (let t = 0; t < 8; t++) for (let s = 0; s < 16; s++) all.push(defaultLook(t, s));
+  for (const l of all) assert.ok(EYE_COLORS.some((c) => c.key === l.eyes), l.eyes);
+  assert.ok(new Set(all.map((l) => l.eyes)).size >= 5, 'eye colour variety');
+  const lightShare = (f) => { const g = all.filter(f); return g.filter((l) => ['blue', 'green', 'grey'].includes(l.eyes)).length / Math.max(1, g.length); };
+  assert.ok(lightShare((l) => l.skin <= 3) > lightShare((l) => l.skin >= 6), 'light eyes are likelier with light skin');
+  assert.equal(eyeHex('nonsense'), EYE_COLORS[0].hex);
+  settings.custom['2-2'] = { eyes: 'green' };
+  assert.equal(lookFor(2, 2).eyes, 'green');
+  settings.custom['2-2'] = { eyes: 'zzz' };
+  assert.equal(lookFor(2, 2).eyes, defaultLook(2, 2).eyes);
+  delete settings.custom['2-2'];
+});

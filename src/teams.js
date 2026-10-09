@@ -113,16 +113,18 @@ export function pickKits(t0, t1) {
   return { outfield, gk };
 }
 
-// CPU skill: chosen difficulty adjusted by the team rating (1-5, 3 = neutral)
-export function makeDiff(diffKey, rating = 3) {
-  const d = DIFFS[diffKey] || DIFFS.normal, k = rating - 3;
+// CPU skill: chosen difficulty adjusted by the team rating (1-5, 3 = neutral) and by the CPU toughness setting
+// (1-5, 3 = the plain difficulty; lower = slower, later, softer; higher = faster, sharper, harder tackles)
+export function makeDiff(diffKey, rating = 3, toughness = 3) {
+  const d = DIFFS[diffKey] || DIFFS.normal, k = rating - 3, t = toughness - 3;
   return {
     ...d,
-    speed: Math.max(0.45, d.speed + k * 0.025),
-    react: Math.max(0.08, d.react * (1 - k * 0.1)),
-    save: Math.max(0.05, Math.min(0.92, d.save + k * 0.05)),
-    tackle: Math.max(0, Math.min(0.9, d.tackle + k * 0.05)),
-    shootRange: d.shootRange + k * 0.8,
+    speed: Math.max(0.45, d.speed + k * 0.025 + t * 0.05),
+    react: Math.max(0.08, d.react * (1 - k * 0.1) * (1 - t * 0.15)),
+    save: Math.max(0.05, Math.min(0.92, d.save + k * 0.05 + t * 0.06)),
+    tackle: Math.max(0, Math.min(0.9, d.tackle + k * 0.05 + t * 0.08)),
+    shootRange: Math.max(6, d.shootRange + k * 0.8 + t * 1.2),
+    aim: Math.max(0.01, d.aim * (1 - t * 0.2)),
   };
 }
 

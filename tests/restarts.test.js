@@ -87,7 +87,7 @@ test('a ball over the bar is out of play, a ball in the goal is a goal', () => {
   assert.equal(g.rules.checkOut(), true, 'over the bar');
   assert.equal(g.rules.pending.type, 'goalkick');
   const h = ready(6);
-  h.ball.reset(PITCH.hl - 3, 0); h.ball.vel.set(18, 0.3, 0); h.ball.lastToucher = h.teams[attackDir(0) === 1 ? 0 : 1][3];
+  h.ball.reset(PITCH.hl - 0.2, 2.8); h.ball.vel.set(18, 0.3, 0); h.ball.lastToucher = h.teams[attackDir(0) === 1 ? 0 : 1][3];
   step(h, 1);
   assert.ok(h.score[0] + h.score[1] === 1 || h.state === 'goal' || h.state === 'replay', 'it was a goal');
 });

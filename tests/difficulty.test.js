@@ -98,3 +98,22 @@ test('the ball camera follows the ball, the follow camera the selected player', 
   assert.ok(lookFollow.x < 0, `looks around the player: ${lookFollow.x}`);
   assert.ok(Math.abs(lookBall.z - -5 * 0.8) < 1);
 });
+
+test('CPU toughness has five levels, defaults to a weaker CPU than before and scales the opponent', async () => {
+  const { CPU_TOUGHNESS, clampToughness } = await import('../src/settings.js');
+  assert.equal(CPU_TOUGHNESS.length, 5);
+  assert.equal(settings.cpuToughness, 2);
+  assert.equal(clampToughness(9), 5); assert.equal(clampToughness(-1), 1); assert.equal(clampToughness('x'), 2);
+  for (let t = 2; t <= 5; t++) {
+    const a = makeDiff('normal', 3, t - 1), b = makeDiff('normal', 3, t);
+    assert.ok(b.speed > a.speed && b.react < a.react && b.save > a.save && b.tackle > a.tackle && b.aim < a.aim);
+  }
+  assert.deepEqual(makeDiff('normal', 3, 3), makeDiff('normal', 3), 'level 3 is the previous behaviour');
+  const g = makeGame();
+  settings.cpuToughness = 1;
+  g.startMatch({ mode: '1p', teams: [0, 1], diff: 'normal', length: 60, knockout: false, env: { time: 'day', weather: 'clear' } });
+  const weak = g.aiDiff[1].speed;
+  settings.cpuToughness = 5;
+  g.startMatch({ mode: '1p', teams: [0, 1], diff: 'normal', length: 60, knockout: false, env: { time: 'day', weather: 'clear' } });
+  assert.ok(g.aiDiff[1].speed > weak);
+});
