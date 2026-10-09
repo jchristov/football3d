@@ -330,13 +330,26 @@ export class Rules {
 
     if (ctrl) { ctrl.reset(); ctrl.player = kicker; }
     for (const c of g.ctrls) if (c !== ctrl) c.reset();
-    const home = { x: S.x - ux * 1.3, z: S.z - uz * 1.3, a: Math.atan2(uz, ux) }; // where the kicker waits behind the ball
+    let home = { x: S.x - ux * 1.3, z: S.z - uz * 1.3, a: Math.atan2(uz, ux) }; // where the kicker waits behind the ball
+    if (type === 'throw') {
+      // the thrower stands just outside the touchline holding the ball overhead with both hands
+      const side = S.z >= 0 ? 1 : -1;
+      home = { x: S.x, z: side * (PITCH.hw + 0.35), a: Math.atan2(-side, 0) };
+      kicker.place(home.x, home.z, home.a);
+      this.holdForThrow(kicker);
+    }
     this.sp = { type, team, S, G, d, kicker, ctrl, home, t: 0, shootout: !!opts.shootout, aiDelay: 1.3 + Math.random() * 0.9 };
     g.state = 'setpiece';
     g.timer = 0;
     if (type === 'free' || type === 'penalty') g.comm.stepsUp(kicker, !!opts.shootout);
     if (!this.so && (type === 'free' || type === 'penalty')) g.hud.setBanner(RESTART_LABEL[type], g.teamCode(team), 1500);
     if (type === 'free' || type === 'penalty') g.sfx.whistle();
+  }
+
+  holdForThrow(k) {
+    const b = this.g.ball;
+    k.throwing = true;
+    b.held = k; b.owner = b.lastToucher = k;
   }
 
   updateSetPiece(dt) {
@@ -370,6 +383,7 @@ export class Rules {
       }
     } else k.move(0, 0, false, dt);
 
+    if (sp.type === 'throw' && g.ball.held === k) return; // still holding it overhead
     if (g.ball.speed > 1.2 || g.ball.pos.y > 0.6) this.release();
   }
 
@@ -378,6 +392,8 @@ export class Rules {
     this.aimMarker.visible = false;
     if (sp.ctrl) sp.ctrl.player.charge = 0;
     const kicker = sp.kicker;
+    kicker.throwing = false;
+    if (g.ball.held === kicker) g.ball.held = null;
     this.sp = null;
     g.state = 'playing';
     g.hud.hideBanner();
@@ -409,6 +425,11 @@ export class Rules {
   recall(sp) {
     const g = this.g, k = sp.kicker;
     const b = g.ball;
+    if (sp.type === 'throw') {
+      k.place(sp.home.x, sp.home.z, sp.home.a);
+      if (b.held !== k) { b.reset(sp.S.x, sp.S.z); this.holdForThrow(k); }
+      return g.canKick(k);
+    }
     if (b.held || Math.hypot(b.pos.x - sp.S.x, b.pos.z - sp.S.z) > 0.5 || b.pos.y > 0.6) b.reset(sp.S.x, sp.S.z);
     k.place(sp.home.x, sp.home.z, sp.home.a);
     return g.canKick(k);
@@ -420,7 +441,7 @@ export class Rules {
     const near = (m) => Math.hypot(m.pos.x - k.pos.x, m.pos.z - k.pos.z);
     if (sp.type === 'throw') {
       const t = g.bestPass(k, g.teams[sp.team], opp, d) || [...mates].sort((a, b) => near(a) - near(b))[0];
-      if (t) g.passTo(k, t, 1, 1.2); else g.clear(k, d);
+      if (t) g.passTo(k, t, 1, 3); else g.clear(k, d);
     } else if (sp.type === 'corner') {
       // the team-mate closest to the goal mouth
       const t = [...mates].sort((a, b) => Math.hypot(a.pos.x - sp.G.x, a.pos.z) - Math.hypot(b.pos.x - sp.G.x, b.pos.z))[0];

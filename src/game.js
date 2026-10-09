@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { DIFFS, PITCH, GOAL, REACH, MATCH_TIME, BALL, SIDES, MATCH, TEAM_SIZES, setPitchForSize, clamp, angleDiff, attackDir, sc, sq } from './constants.js';
 import { Ball } from './ball.js';
-import { Player } from './player.js';
+import { Player, THROW_TIME } from './player.js';
 import { runAI, segDist } from './ai.js';
 import { Controller, RemoteController, SCHEMES } from './controls.js';
 import { Rules } from './rules.js';
@@ -398,7 +398,8 @@ export class Game {
   // kind: 'shot' | 'pass' | 'other' (feeds the match statistics and commentary)
   doKick(p, angle, speed, lift, spin = 0, kind = 'other') {
     const sp = this.rules.sp;
-    if (sp && sp.type === 'throw' && sp.kicker === p) { speed = Math.min(speed, 13); lift = Math.max(lift, 1.4); kind = 'pass'; } // a throw is a short, lofted pass
+    const throwIn = !!(sp && sp.type === 'throw' && sp.kicker === p);
+    if (throwIn) { speed = Math.min(speed, 13); lift = Math.max(lift, 3); kind = 'pass'; } // thrown with both hands from overhead
     if (kind === 'shot') speed *= aptitude(p, 'att'); // strikers hit it harder
     this.stats.touch(p, this.time);
     this.ball.kick(p, angle, speed, lift, spin);
@@ -419,7 +420,8 @@ export class Game {
     const dir = attackDir(p.team);
     if (speed > 17 && Math.cos(angle) * dir > 0.5 && (dir * PITCH.hl - p.pos.x) * dir < 16) this.sfx.ooh(0.35);
     p.kickCd = 0.35;
-    p.kickAnim = 0.2;
+    if (throwIn) { p.throwing = false; p.throwT = THROW_TIME; }
+    else p.kickAnim = 0.2;
     p.facing = angle;
   }
 
@@ -667,7 +669,7 @@ export class Game {
       }
 
       const assist = 1 + (this.humanAssist[p.team] || 0); // beginner levels: the ball sticks to the feet of the human team
-      const reach = (p.lungeT > 0 ? 1.5 : REACH) * (0.7 + BALL.r) * assist; // a smaller ball is a little harder to control
+      const reach = (p.lungeT > 0 ? 1.5 : REACH) * (0.7 + BALL.r) * assist * (b.owner === p ? 1.2 : 1); // the carrier keeps the ball closer to his feet // a smaller ball is a little harder to control
       const d = Math.hypot(b.pos.x - p.pos.x, b.pos.z - p.pos.z);
       if (d > reach || b.pos.y > 1.3 || p.kickCd > 0 || p.stunT > 0 || p.touchCd > 0) continue;
       const o = b.owner;
@@ -695,6 +697,8 @@ export class Game {
     const open = (cx * px + cz * pz) / (cl * pl); // 1: the defender is on the side of the ball, -1: the body is between
     let chance = 0.3 * tackleChance(p, o) * (open > 0.2 ? 1.3 : open < -0.2 ? 0.25 : 0.6);
     if (d > 0.9) chance *= 0.5;
+    if (o.guardT > 0) chance *= 0.35; // a player who just won or received the ball gets a moment to settle it
+    if (o.speed < 1.5 && open < 0.2) chance *= 0.7; // standing with the body between ball and challenger: hold-up play
     if (o.speed > 5.5 && open < 0.5) chance *= 0.6; // a sprinter pushes the ball past the challenger
     const human = this.ctrls.some((k) => k.enabled && k.player === p);
     if (!human) chance *= Math.max(0.3, (this.aiDiff[p.team]?.tackle ?? 0.45) / 0.45);
@@ -710,6 +714,7 @@ export class Game {
   takeBall(p) {
     const b = this.ball, mine = b.owner === p;
     p.touchCd = mine ? 0.09 : 0.2; // the carrier keeps nudging the ball, so it stays at his feet
+    if (!mine) p.guardT = 0.6;
     b.owner = p; b.lastToucher = p;
     b.spin = 0;
     this.stats.touch(p, this.time);

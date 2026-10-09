@@ -46,3 +46,21 @@ test('players of different teams still get pushed apart and the carrier is pushe
   assert.ok(b.pos.x - a.pos.x >= 0.79);
   assert.ok(Math.abs(a.pos.x) < Math.abs(b.pos.x - 0.4));
 });
+
+test('a player who has just won the ball is hard to rob again straight away', () => {
+  const run = (guard) => {
+    seedRandom(11);
+    const g = setup();
+    const p = g.teams[0].find((x) => !x.isGK), d = g.teams[1].find((x) => !x.isGK);
+    p.place(0, 0, 0); p.facing = 0; p.vel.set(3, 0, 0); d.place(0.9, 0.7, 0); d.facing = 0;
+    g.ball.reset(0.6, 0); g.ball.owner = p;
+    let stolen = 0;
+    for (let i = 0; i < 400; i++) {
+      p.guardT = guard;
+      if (g.winBallFrom(d, p, 0.8)) stolen++;
+    }
+    return stolen;
+  };
+  const a = run(0.5), b = run(0);
+  assert.ok(b > 0 && a < b, `settling ${a} vs ${b}`);
+});

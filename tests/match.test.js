@@ -112,6 +112,8 @@ test('fouls: a foul inside the box is a penalty, outside a free kick', () => {
   assert.equal(g.rules.sp.type, 'free');
 
   const g2 = makeGame(); startCpuMatch(g2, { length: 600 }); runUntil(g2, () => g2.state === 'playing', 10); step(g2, 2);
+  g2.rules.varVerdict = () => null; // no random VAR overturn here
+  g2.state = 'playing'; // the CPU play may have stopped the game for a restart meanwhile
   const v2 = g2.teams[0][2]; v2.pos.set(PITCH.hl - 3, 0, 2); // inside team 1's penalty area
   g2.rules.foul(g2.teams[1][2], v2);
   assert.equal(g2.rules.pending.type, 'penalty');

@@ -102,7 +102,7 @@ test('nothing happens while the ball is inside, held by the keeper, or during a 
   assert.equal(g.rules.checkOut(), false);
 });
 
-test('a human throw-in is a short, lofted pass; a human corner is an ordinary kick', () => {
+test('a human throw-in is thrown by hand: held overhead, then a short lofted throw; a human corner is an ordinary kick', () => {
   seedRandom(9);
   const g = makeGame({ restarts: true });
   startCpuMatch(g, { mode: '1p', length: 600 });
@@ -113,10 +113,13 @@ test('a human throw-in is a short, lofted pass; a human corner is an ordinary ki
   const sp = g.rules.sp;
   assert.equal(sp.type, 'throw'); assert.equal(sp.team, 0);
   assert.equal(sp.ctrl, g.ctrls[0]); assert.equal(g.ctrls[0].player, sp.kicker, 'the human takes it');
-  g.ball.reset(sp.S.x, sp.S.z); sp.kicker.kickCd = 0; sp.kicker.stunT = 0; sp.kicker.lungeT = 0;
+  assert.equal(g.ball.held, sp.kicker, 'the thrower holds the ball in both hands');
+  assert.ok(sp.kicker.throwing && Math.abs(sp.kicker.pos.z) > PITCH.hw - 0.7, 'overhead pose, standing at the touchline');
+  sp.kicker.kickCd = 0; sp.kicker.stunT = 0; sp.kicker.lungeT = 0;
   g.doKick(sp.kicker, 0, 30, 0.2, 0, 'shot');
   assert.ok(g.ball.speed <= 13.5, `capped: ${g.ball.speed}`);
   assert.ok(g.ball.vel.y > 1, 'lofted');
+  assert.equal(g.ball.held, null); assert.ok(!sp.kicker.throwing && sp.kicker.throwT > 0, 'throwing motion plays');
 });
 
 test('full matches with restarts finish at every team size and produce restarts', () => {

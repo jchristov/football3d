@@ -7,6 +7,7 @@ const BASE_SPEED = 6.4;
 export const FATIGUE_MIN = 0.86; // speed factor of a completely drained player
 const SPRINT_DRAIN = 0.26, SPRINT_REGEN = 0.12;
 export const POSE_LEN = 15;
+export const THROW_TIME = 0.35;
 const [RIG_X, RIG_Y, RIG_Z, UP_X, HIP_L, KNEE_L, HIP_R, KNEE_R, SH_L, EL_L, SH_R, EL_R, AB_L, AB_R, HEAD_Y] = [...Array(POSE_LEN).keys()];
 
 // A decal that hugs the torso capsule (radius 0.25, centre y 0.36, 0.34 long) between heights y0..y1, covering the
@@ -88,10 +89,11 @@ export class Player {
     this.injured = false; // limping: slower, no sprinting (set by the lineups)
     this.stamina = 1; // short-term sprint tank
     this.energy = 1; // long-term freshness: drains over the match, slows the player down
-    this.kickCd = 0; this.touchCd = 0; this.lungeT = 0; this.lungeCd = 0; this.stunT = 0;
+    this.kickCd = 0; this.touchCd = 0; this.guardT = 0; this.lungeT = 0; this.lungeCd = 0; this.stunT = 0;
     this.kickAnim = 0; this.saveCd = 0; this.holdT = 0; this.stuckT = 0;
     this.jumpT = 0; this.headCd = 0; this.grip = 1; this.drainMul = 1; this.squadSlot = 0;
     this.diveT = 0; this.diveSide = 1; this.holding = false;
+    this.throwing = false; this.throwT = 0; // throw-in: ball held overhead / the throwing motion
     this.carry = new THREE.Vector3(); this.carryOk = false; // where the ball sits while the keeper holds it
     this.lungeAngle = 0;
     this.decide = Math.random() * 0.3;
@@ -255,7 +257,8 @@ export class Player {
     this.pos.set(x, 0, z);
     this.vel.set(0, 0, 0);
     this.facing = facing;
-    this.kickCd = this.touchCd = this.lungeT = this.stunT = this.saveCd = this.holdT = this.kickAnim = this.stuckT = this.jumpT = this.headCd = this.diveT = 0;
+    this.kickCd = this.touchCd = this.guardT = this.lungeT = this.stunT = this.saveCd = this.holdT = this.kickAnim = this.stuckT = this.jumpT = this.headCd = this.diveT = this.throwT = 0;
+    this.throwing = false;
     this.charge = 0;
     this.celebrate = false;
     this.stamina = 1;
@@ -272,6 +275,7 @@ export class Player {
   tick(dt) {
     this.kickCd = Math.max(0, this.kickCd - dt);
     this.touchCd = Math.max(0, this.touchCd - dt);
+    this.guardT = Math.max(0, this.guardT - dt);
     this.lungeT = Math.max(0, this.lungeT - dt);
     this.lungeCd = Math.max(0, this.lungeCd - dt);
     this.stunT = Math.max(0, this.stunT - dt);
@@ -280,6 +284,7 @@ export class Player {
     this.jumpT = Math.max(0, this.jumpT - dt);
     this.headCd = Math.max(0, this.headCd - dt);
     this.diveT = Math.max(0, this.diveT - dt);
+    this.throwT = Math.max(0, this.throwT - dt);
   }
 
   startLunge(angle = this.facing) {
@@ -369,6 +374,17 @@ export class Player {
     }
     // cradling the ball at chest height: both hands 0.41 m ahead and 0.26 m either side of the centre line
     if (this.holding) { T[SH_L] = T[SH_R] = -0.25; T[EL_L] = T[EL_R] = -1.2; T[AB_L] = T[AB_R] = -0.2; T[UP_X] = 0.12; }
+    if (this.throwing) {
+      // throw-in: the ball held with both hands behind the head, leaning back
+      T[SH_L] = T[SH_R] = -2.75; T[EL_L] = T[EL_R] = -0.7; T[AB_L] = T[AB_R] = 0.15; T[UP_X] = -0.15;
+      T[HIP_L] = 0.25; T[HIP_R] = -0.25; T[KNEE_L] = 0.3; T[KNEE_R] = 0.1;
+    }
+    if (this.throwT > 0) {
+      // both arms whip forward over the head, body follows
+      const u = 1 - this.throwT / THROW_TIME;
+      T[SH_L] = T[SH_R] = -3.0 + 1.6 * u; T[EL_L] = T[EL_R] = -1.0 + 0.9 * u; T[AB_L] = T[AB_R] = 0.15;
+      T[UP_X] = -0.2 + 0.6 * u; T[HIP_L] = 0.25; T[HIP_R] = -0.25; T[KNEE_L] = 0.3; T[KNEE_R] = 0.1;
+    }
 
     if (this.kickAnim > 0) {
       const u = 1 - this.kickAnim / 0.2;
