@@ -20,3 +20,5 @@ export function applyDevice(body = document.body) {
 export const phoneFactor = (height) => Math.min(1, Math.max(0.55, height / 640));
 // Zoom of the panels (menus, settings ...) on a phone: everything in them (text, buttons, spacing) gets smaller
 export const panelZoom = (height) => Math.min(0.88, Math.max(0.68, height / 520));
+// Zoom of the panels on a computer: compact, so menus and settings need little scrolling
+export const DESKTOP_PANEL_ZOOM = 0.85;

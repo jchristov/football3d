@@ -24,6 +24,7 @@ export const makeDefaults = () => ({
   lineupScreen: true, // the team sheets before kick-off
   mouse: true, // mouse control: run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch
   cpuToughness: 2, // how tough the CPU opponent plays in a 1-player match, 1 (very easy) - 5 (relentless)
+  swapHalves: true, // the teams change ends after half-time (off: they keep their sides)
   restarts: true, // throw-ins, corners and goal kicks (off: the ball bounces off the boards)
   autoQuality: true, // lower the graphics quality automatically when the frame rate is poor
   colorBlind: false, // colour-blind-safe palette for the speciality bars and the cards

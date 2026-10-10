@@ -9,7 +9,7 @@ import { Menu } from './menu.js';
 import { SettingsUI } from './settings-ui.js';
 import { PadNav } from './padnav.js';
 import { TouchControls } from './touch.js';
-import { applyDevice, touchWanted, phoneFactor, panelZoom } from './device.js';
+import { applyDevice, touchWanted, phoneFactor, panelZoom, DESKTOP_PANEL_ZOOM } from './device.js';
 import { FS_ENTER, FS_EXIT } from './icons.js';
 import { bindMouse } from './mouse.js';
 import { bindTapSelect } from './tapselect.js';
@@ -168,7 +168,7 @@ const applyUi = () => {
   const a = Math.min(1, Math.max(0.3, Number(settings.panelOpacity) || 0.86));
   document.documentElement.style.setProperty('--pa', a);
   const ui = clampUiScale(settings.uiScale);
-  document.documentElement.style.setProperty('--uz', ui * (document.body.classList.contains('nokb') ? panelZoom(window.innerHeight) : 1)); // panels: smaller on a phone
+  document.documentElement.style.setProperty('--uz', ui * (document.body.classList.contains('nokb') ? panelZoom(window.innerHeight) : DESKTOP_PANEL_ZOOM)); // panels: compact, smaller still on a phone
   document.documentElement.style.setProperty('--ui', ui * (document.body.classList.contains('nokb') ? phoneFactor(window.innerHeight) : 1)); // on-screen widgets: smaller on a phone held sideways
   document.documentElement.style.setProperty('--ts', clampTouchScale(settings.touchScale)); // touch buttons
   document.body.classList.toggle('cblind', !!settings.colorBlind);

@@ -6,7 +6,7 @@ const read = (f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')
 const css = read('src/style.css');
 
 test('every text button has one of two heights, defined once', () => {
-  assert.match(css, /--btn-h:\s*44px/); assert.match(css, /--btn-h-sm:\s*34px/);
+  assert.match(css, /--btn-h:\s*38px/); assert.match(css, /--btn-h-sm:\s*30px/);
   assert.match(css, /min-height:\s*var\(--btn-h\)/); assert.match(css, /min-height:\s*var\(--btn-h-sm\)/);
   assert.match(css, /#startBtn[^{]*\{[^}]*min-height:\s*var\(--btn-h\)/s, 'the start button follows the same height');
 });

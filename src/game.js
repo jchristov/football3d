@@ -957,11 +957,12 @@ export class Game {
     if (this.state !== 'halftime') return;
     this.hud.hideBanner();
     this.half = 2;
-    SIDES.flip = -1;
+    const swap = settings.swapHalves !== false;
+    SIDES.flip = swap ? -1 : 1;
     this.halfTimer = 0;
     for (const p of this.all) p.energy = Math.min(1, p.energy + 0.25);
     this.comm.secondHalf();
-    this.hud.toast('↔ Teams switch ends', 2600);
+    if (swap) this.hud.toast('↔ Teams switch ends', 2600);
     this.resetKickoff(1);
   }
 

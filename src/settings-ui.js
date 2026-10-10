@@ -67,23 +67,24 @@ export class SettingsUI {
       <h3>Graphics</h3>
       <div class="set-opts" id="setQuality">${Object.entries(QUALITY).map(([k, v]) => `<button data-q="${k}" class="${s.quality === k ? 'on' : ''}">${v}</button>`).join('')}
         <span class="hint">Low: no shadows, static crowd, fewer particles, 1× resolution.</span></div>
-      <div class="set-opts" style="margin-top:6px"><label><input type="checkbox" id="setAutoQ" ${s.autoQuality !== false ? 'checked' : ''}> Lower the quality automatically when the frame rate is poor</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setAutoQ" ${s.autoQuality !== false ? 'checked' : ''}> Lower the quality automatically when the frame rate is poor</label></div>
       ${slider('panelOpacity', 'Panel opacity (all panels)', 30)}
       <h3>Accessibility</h3>
-      <div class="set-opts" style="margin-top:4px"><label><input type="checkbox" id="setCb" ${s.colorBlind ? 'checked' : ''}> Colour-blind-safe colours (blue / yellow / orange bars, patterned red cards)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setCb" ${s.colorBlind ? 'checked' : ''}> Colour-blind-safe colours (blue / yellow / orange bars, patterned red cards)</label></div>
       ${slider('uiScale', 'Size of widgets and panels', 80).replace('max="100"', 'max="150"')}
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setRm" ${s.reducedMotion ?? (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'checked' : ''}> Reduce motion (no animations, no confetti, still crowd)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setRm" ${s.reducedMotion ?? (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'checked' : ''}> Reduce motion (no animations, no confetti, still crowd)</label></div>
       <h3>Match</h3>
       <div class="set-opts" id="setLength"><span>Friendly match length</span>${LENGTHS.map((l) => `<button data-l="${l}" class="${s.length === l ? 'on' : ''}">${l / 60} min</button>`).join('')}</div>
       <div class="set-opts" id="setTough"><span title="How hard the CPU opponent plays in a 1-player match: its speed, reactions, tackling, shooting and goalkeeping">CPU toughness</span>${CPU_TOUGHNESS.map((l, i) => `<button data-t="${i + 1}" class="${clampToughness(s.cpuToughness) === i + 1 ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setComm" ${s.commentary ? 'checked' : ''}> Live text commentary</label></div>
-      <div class="set-opts kb-only" style="margin-top:8px"><label><input type="checkbox" id="setMouse" ${s.mouse !== false ? 'checked' : ''}> Mouse control (run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch)</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setRestarts" ${s.restarts !== false ? 'checked' : ''}> Throw-ins, corners and goal kicks (off: the ball bounces off the boards)</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setVar" ${s.var !== false ? 'checked' : ''}> VAR (a video review of penalties and straight red cards can overturn them)</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setInj" ${s.injuries ? 'checked' : ''}> Injuries (hard challenges can hurt players)</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setLineup" ${s.lineupScreen ? 'checked' : ''}> Show the team sheets before kick-off</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setBars" ${s.playerBars ? 'checked' : ''}> Show energy and speciality bars (ball carrier and human players)</label></div>
-      <div class="set-opts" style="margin-top:8px"><label><input type="checkbox" id="setClockUp" ${s.clockUp ? 'checked' : ''}> Count the match clock up (elapsed time) instead of down (time left)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setComm" ${s.commentary ? 'checked' : ''}> Live text commentary</label></div>
+      <div class="set-opts kb-only" style="margin-top:3px"><label><input type="checkbox" id="setMouse" ${s.mouse !== false ? 'checked' : ''}> Mouse control (run to the pointer, left click shoot, right click pass, middle click tackle, wheel switch)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setSwap" ${s.swapHalves !== false ? 'checked' : ''}> Teams swap halves after half-time</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setRestarts" ${s.restarts !== false ? 'checked' : ''}> Throw-ins, corners and goal kicks (off: the ball bounces off the boards)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setVar" ${s.var !== false ? 'checked' : ''}> VAR (a video review of penalties and straight red cards can overturn them)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setInj" ${s.injuries ? 'checked' : ''}> Injuries (hard challenges can hurt players)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setLineup" ${s.lineupScreen ? 'checked' : ''}> Show the team sheets before kick-off</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setBars" ${s.playerBars ? 'checked' : ''}> Show energy and speciality bars (ball carrier and human players)</label></div>
+      <div class="set-opts" style="margin-top:3px"><label><input type="checkbox" id="setClockUp" ${s.clockUp ? 'checked' : ''}> Count the match clock up (elapsed time) instead of down (time left)</label></div>
       <h3>Spoken commentary</h3>
       <div class="set-opts"><label><input type="checkbox" id="setTts" ${s.tts !== false ? 'checked' : ''}> Read the commentary aloud</label></div>
       <div class="set-opts"><label><input type="checkbox" id="setAnn" ${s.announcer !== false ? 'checked' : ''}> Stadium announcer (deeper PA voice: line-ups, goals, cards, substitutions)</label></div>
@@ -104,7 +105,7 @@ export class SettingsUI {
         Touch controls appear automatically on touch devices.</div>
       <div class="shortcuts">${SHORTCUTS.map(([k, d]) => `<span><b>${k}</b> ${d}</span>`).join('')}</div>
       </div>
-      <div class="set-opts" style="margin-top:18px"><button id="setReset">Reset all settings</button><button id="setDone" class="primary">Done</button></div>
+      <div class="set-opts" style="margin-top:12px"><button id="setReset">Reset all settings</button><button id="setDone" class="primary">Done</button></div>
     </div>`;
     buildBallPicker(this.root.querySelector('#setBall'));
     buildBallSizePicker(this.root.querySelector('#setSize'));
@@ -137,6 +138,7 @@ export class SettingsUI {
     r.querySelector('#setRm').onchange = (e) => { settings.reducedMotion = e.target.checked; saveSettings(); };
     r.querySelector('#setAutoQ').onchange = (e) => { settings.autoQuality = e.target.checked; saveSettings(); };
     r.querySelector('#setMouse').onchange = (e) => { settings.mouse = e.target.checked; saveSettings(); };
+    r.querySelector('#setSwap').onchange = (e) => { settings.swapHalves = e.target.checked; saveSettings(); };
     r.querySelector('#setRestarts').onchange = (e) => { settings.restarts = e.target.checked; saveSettings(); };
     r.querySelector('#setVar').onchange = (e) => { settings.var = e.target.checked; saveSettings(); };
     r.querySelector('#setInj').onchange = (e) => { settings.injuries = e.target.checked; saveSettings(); };

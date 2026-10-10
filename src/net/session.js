@@ -1,6 +1,6 @@
 import { Controller, SCHEMES } from '../controls.js';
 import { encodeSnapshot, decodeSnapshot, applySnapshot } from './snapshot.js';
-import { setBallSize } from '../constants.js';
+import { setBallSize, SIDES } from '../constants.js';
 import { settings } from '../settings.js';
 
 const SEND_HZ = 30;
@@ -79,7 +79,7 @@ export class HostSession {
 
   // Everything the guest needs to start the same match
   startCfg(cfg) {
-    return { teams: cfg.teams, size: cfg.size, length: cfg.length, offside: cfg.offside, env: cfg.env, tactics: cfg.tacticsBy, knockout: false, ballFace: this.game.ball.face, ballSize: settings.ballSize };
+    return { teams: cfg.teams, size: cfg.size, length: cfg.length, offside: cfg.offside, env: cfg.env, tactics: cfg.tacticsBy, knockout: false, ballFace: this.game.ball.face, ballSize: settings.ballSize, swapHalves: settings.swapHalves !== false };
   }
 
   start(cfg) {
@@ -198,6 +198,7 @@ export class GuestSession {
     const g = this.game;
     this.buf = []; this.started = true; this.gone = false;
     setBallSize(cfg.ballSize || 5);
+    this.swapHalves = cfg.swapHalves !== false;
     g.net = this;
     g.startMatch({ ...cfg, mode: '2p', net: { role: 'guest' }, onEnd: null });
     if (cfg.ballFace) g.ball.show?.(cfg.ballFace);
@@ -248,6 +249,7 @@ export class GuestSession {
   applyState(s) {
     const g = this.game, prev = g.state;
     g.state = s.state; g.timer = s.timer; g.clock = s.clock; g.half = s.half; g.score = s.score;
+    SIDES.flip = s.half === 2 && this.swapHalves !== false ? -1 : 1;
     g.excite = s.excite; g.remoteProgress = s.progress; g.lastGoalDir = s.goalDir; g.replayReason = s.reason; g.kickTeam = s.kickTeam;
     g.rules.sp = s.sp;
     g.rules.so = s.so ? (g.rules.so || {}) : null;

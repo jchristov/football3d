@@ -28,13 +28,13 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1226; f
 #help b { background: rgba(255,255,255,.18); padding: 1px 6px; border-radius: 4px; color: #fff; font-weight: 600; }
 
 .overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, rgba(8,14,34,calc(var(--pa) * .64)), rgba(8,14,34,calc(var(--pa) * 1.02))); z-index: 5; }
-.panel { text-align: center; padding: 30px 40px; max-width: 640px; background: rgba(12, 20, 46, var(--pa)); border: 1px solid rgba(255,255,255,.14); border-radius: 18px; box-shadow: 0 20px 80px rgba(0,0,0,.6); }
-.panel h1 { font-size: clamp(30px, 5vw, 54px); font-weight: 900; font-style: italic; letter-spacing: .03em; }
+.panel { text-align: center; padding: 20px 28px; max-width: 640px; background: rgba(12, 20, 46, var(--pa)); border: 1px solid rgba(255,255,255,.14); border-radius: 18px; box-shadow: 0 20px 80px rgba(0,0,0,.6); }
+.panel h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 900; font-style: italic; letter-spacing: .03em; }
 .panel h1 span { color: #2ee27a; }
-.panel h2 { font-size: 44px; font-weight: 900; font-style: italic; }
-.panel h3 { margin-top: 22px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; opacity: .6; }
+.panel h2 { font-size: 34px; font-weight: 900; font-style: italic; }
+.panel h3 { margin-top: 14px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; opacity: .6; }
 .panel .tag { margin-top: 8px; opacity: .8; }
-.row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+.row { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
 button { font: inherit; color: #fff; cursor: pointer; padding: 10px 22px; border-radius: 10px; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.18); font-weight: 600; transition: transform .1s, background .15s, border-color .15s; }
 button:hover { background: rgba(255,255,255,.18); transform: translateY(-1px); }
 button.on { border-color: #2ee27a; background: rgba(46,226,122,.18); }
@@ -42,8 +42,8 @@ button.swatch { width: 44px; height: 44px; padding: 0; border-radius: 50%; backg
 button.swatch.on { border-color: #fff; box-shadow: 0 0 0 3px var(--c); }
 button.primary { margin-top: 26px; padding: 14px 40px; font-size: 20px; background: linear-gradient(#2ee27a, #17a85a); border-color: #7dffb5; color: #04210f; font-weight: 800; }
 button.primary small { font-weight: 500; opacity: .7; }
-.keys { margin: 26px auto 0; font-size: 13px; border-collapse: collapse; text-align: left; }
-.keys td { padding: 4px 12px; opacity: .85; }
+.keys { margin: 14px auto 0; font-size: 13px; border-collapse: collapse; text-align: left; }
+.keys td { padding: 2px 10px; opacity: .85; }
 .keys b { background: rgba(255,255,255,.16); padding: 1px 7px; border-radius: 4px; }
 #finalScore { font-size: 72px; font-weight: 900; margin: 8px 0; font-variant-numeric: tabular-nums; }
 #finalMsg { font-size: 20px; opacity: .85; }
@@ -60,14 +60,14 @@ button.primary small { font-weight: 500; opacity: .7; }
 
 /* ---- v3: teams, tournaments, replay, pens, toast ---- */
 .panel { max-height: 94vh; overflow-y: auto; }
-.panel.wide { max-width: 860px; width: 94vw; padding: 24px 32px; }
-.panel.wide h3 { margin-top: 14px; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; text-align: center; }
+.panel.wide { max-width: 1040px; width: 94vw; padding: 18px 26px; }
+.panel.wide h3 { margin-top: 8px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 22px; text-align: center; }
 .grid .row { flex-wrap: wrap; }
 button.small, .row button { padding: 8px 16px; font-size: 14px; }
-.teams { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 10px; }
-.teams button { padding: 8px 4px; font-size: 12px; letter-spacing: .05em; display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 12px; }
-.teams button i { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); background: var(--c); }
+.teams { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 8px; }
+.teams button { padding: 5px 4px; font-size: 11px; letter-spacing: .05em; display: flex; flex-direction: column; align-items: center; gap: 2px; border-radius: 12px; }
+.teams button i { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); background: var(--c); }
 .teams button em { font-style: normal; font-size: 10px; color: #ffd21e; letter-spacing: 1px; }
 .teams button.dis { opacity: .35; pointer-events: none; }
 .teams button.on { border-color: #fff; background: rgba(255,255,255,.2); }
@@ -116,6 +116,7 @@ body.two .powerWrap { width: 180px; }
 .fx .sc { min-width: 74px; text-align: center; font-size: 20px; font-variant-numeric: tabular-nums; }
 .fx small { opacity: .6; font-weight: 500; }
 .trophy { font-size: 64px; text-align: center; }
+@media (max-width: 1000px) { .grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 800px) { .teams { grid-template-columns: repeat(4, 1fr); } .grid { grid-template-columns: 1fr; } }
 
 /* ---- v4: commentary, name tags, stats ---- */
@@ -179,15 +180,15 @@ button:focus-visible { outline: 3px solid #ffd21e; outline-offset: 2px; }
 
 /* settings overlay */
 #settings, #helpScreen { z-index: 9; }
-#settings .panel { text-align: left; width: min(760px, 96vw); max-height: 94vh; overflow-y: auto; padding: 22px 28px; }
-#settings h2 { font-size: 30px; display: flex; justify-content: space-between; align-items: center; }
-#settings h3 { margin: 18px 0 8px; }
-.set-row { display: grid; grid-template-columns: 150px 1fr 50px; gap: 12px; align-items: center; padding: 4px 0; font-size: 14px; }
+#settings .panel { text-align: left; width: min(760px, 96vw); max-height: 94vh; overflow-y: auto; padding: 16px 24px; }
+#settings h2 { font-size: 26px; display: flex; justify-content: space-between; align-items: center; }
+#settings h3 { margin: 12px 0 5px; }
+.set-row { display: grid; grid-template-columns: 150px 1fr 50px; gap: 10px; align-items: center; padding: 2px 0; font-size: 13px; }
 .set-row input[type=range] { width: 100%; accent-color: #2ee27a; }
 .set-row output { text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
-.set-opts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.set-opts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .set-opts button { padding: 6px 14px; font-size: 13px; }
-.bind-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; margin-top: 8px; font-size: 14px; align-items: center; }
+.bind-grid { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; margin-top: 6px; font-size: 13px; align-items: center; }
 .bind-grid button { min-width: 110px; padding: 5px 12px; font-size: 13px; }
 .bind-grid button.listening { border-color: #ffd21e; background: rgba(255,210,30,.2); animation: pulse 1s infinite; }
 .pad-status { font-size: 13px; opacity: .8; margin-top: 4px; }
@@ -217,11 +218,11 @@ button.ballopt img { display: block; border-radius: 50%; background: radial-grad
 #touch .mini button { min-width: 44px; min-height: 44px; font-size: 16px; padding: 4px 10px; background: rgba(8,14,34,.7); }
 #vitalsWrap { bottom: 62px; }
 
-#ballRow, #setBall { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; margin-top: 10px; width: 100%; }
+#ballRow, #setBall { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; margin-top: 6px; width: 100%; }
 button.ballopt { padding: 5px 4px; font-size: 10px; letter-spacing: .02em; white-space: nowrap; }
-button.ballopt img { width: 48px; height: 48px; }
+button.ballopt img { width: 38px; height: 38px; }
 button.ballopt span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-button.ballopt .dice { font-style: normal; font-size: 30px; line-height: 48px; width: 48px; height: 48px; display: block; }
+button.ballopt .dice { font-style: normal; font-size: 24px; line-height: 38px; width: 38px; height: 38px; display: block; }
 
 /* ---- v6: tactics, squads, offside ---- */
 #tactics, #squad { z-index: 8; background: rgba(5,9,22,calc(var(--pa) + .08)); backdrop-filter: blur(6px); }
@@ -564,18 +565,18 @@ body.cblind .fg.W { background: #56b4e9; } body.cblind .fg.L { background: #d55e
    regular text buttons (option choices, actions, primary actions) are --btn-h tall, dense editor controls (key bindings, squad
    editor chips, tabs, replay clip) are --btn-h-sm tall, round icon buttons are --btn-h wide and tall. Tiles with a picture
    (balls, teams, players, formations, looks) are not text buttons and size themselves. */
-:root { --btn-h: 44px; --btn-h-sm: 34px; }
+:root { --btn-h: 38px; --btn-h-sm: 30px; }
 :is(.row, .set-opts, .panel) button:not(.ballopt, .sizeopt, .card, .pl, .fopt, .sw, .swatch, .tab, .tb, .best, .padtile, [data-team]),
 #startBtn, #installBtn, button.primary {
-  box-sizing: border-box; min-height: var(--btn-h); padding: 0 16px; margin-top: 0; font-size: 15px; line-height: 1.2;
+  box-sizing: border-box; min-height: var(--btn-h); padding: 0 14px; margin-top: 0; font-size: 14px; line-height: 1.2;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; vertical-align: middle;
 }
-:is(.row, .set-opts, .panel) button.primary, #startBtn { font-size: 17px; padding: 0 30px; }
-#startBtn { margin-top: 26px; font-size: 20px; padding: 0 56px; }
+:is(.row, .set-opts, .panel) button.primary, #startBtn { font-size: 16px; padding: 0 28px; }
+#startBtn { margin-top: 14px; font-size: 18px; padding: 0 50px; }
 :is(.row, .set-opts, .panel) button:not(.ballopt, .sizeopt, .card, .pl, .fopt, .sw, .swatch, .tab, .tb, .best, [data-team]) small { font-size: 12px; }
 .row, .set-opts { align-items: center; }
 .panel .bind-grid button, .panel .opts button, .panel button.tab, .panel button.small, button.small, #replay .tag button {
-  box-sizing: border-box; min-height: var(--btn-h-sm); padding: 0 12px; margin-top: 0; font-size: 13px; line-height: 1.2;
+  box-sizing: border-box; min-height: var(--btn-h-sm); padding: 0 10px; margin-top: 0; font-size: 12px; line-height: 1.2;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
 }
 #settings h2 button, .sq h2 button { width: var(--btn-h); height: var(--btn-h); min-height: 0; padding: 0; }

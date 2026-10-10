@@ -48,6 +48,18 @@ test('the second half: teams switch ends, the other team kicks off, and the matc
   assert.ok(g.result.score.length === 2);
 });
 
+test('with "swap halves" off the teams keep their sides in the second half', () => {
+  const { g } = playToHalftime(3);
+  settings.swapHalves = false;
+  try {
+    const gk = [g.teams[0][0].pos.x, g.teams[1][0].pos.x];
+    g.endHalftime();
+    assert.equal(g.half, 2); assert.equal(SIDES.flip, 1); assert.equal(attackDir(0), 1);
+    assert.equal(g.kickTeam, 1);
+    assert.ok(Math.sign(g.teams[0][0].pos.x) === Math.sign(gk[0]) || Math.abs(gk[0]) < 1, 'keepers stay at their goals');
+  } finally { delete settings.swapHalves; }
+});
+
 test('a goal in the second half counts for the team that scored at the other end', () => {
   const { g } = playToHalftime(4);
   g.endHalftime();
