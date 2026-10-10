@@ -187,13 +187,14 @@ export class Controller {
     if (charging) p.charge = Math.min(1, p.charge + dt / 0.9);
     else if (p.charge > 0) {
       if (aim !== null) p.facing = aim; // shoot where the pointer is
-      g.humanShoot(p, Math.max(0.12, p.charge), inp.down(...k.curl));
+      if (!g.humanHeader(p, Math.max(0.15, p.charge), aim ?? (l > 0 ? Math.atan2(dz, dx) : null), false)) g.humanShoot(p, Math.max(0.12, p.charge), inp.down(...k.curl));
       p.charge = 0;
     }
 
     if (inp.down(...k.pass)) this.passHold += dt;
     else if (this.passHold > 0) {
-      g.humanPass(p, aim ?? (l > 0 ? Math.atan2(dz, dx) : null), this.passHold > LOB_HOLD);
+      const want = aim ?? (l > 0 ? Math.atan2(dz, dx) : null);
+      if (!g.humanHeader(p, 0.5, want, true)) g.humanPass(p, want, this.passHold > LOB_HOLD);
       this.passHold = 0;
     }
 

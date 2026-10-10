@@ -59,8 +59,10 @@ Shared: `T` autopilot (single player), `V` instant replay, `N` commentary on/off
   Free kicks are taken by the nearest player (human or CPU) against a two-man wall.
 - **Penalties:** left/right aims, hold shoot for power — a full bar skies it.
 - **Shoot-out:** best of five, then sudden death, with the usual early finish.
-- **Headers & volleys:** balls at head height are headed automatically (hold shoot for a power header); shooting an airborne ball is a volley.
+- **Headers & volleys:** with a ball in the air at head height, *shoot* heads it where you aim (towards goal if you are roughly facing it) and *pass* nods it to a teammate; hold the button for a harder header. Balls that come at head height are otherwise still headed automatically. Shooting an airborne ball lower down is a volley.
   Lobbed passes are timed to arrive at head height. Crossing AI players and keepers deal with high balls too.
+- **Shot strength:** hold shoot (or the SHOOT button) to charge the power bar (green → red, white glow when full): a tap is a gentle side-foot shot, a full charge a rocket.
+- **Sticky dribbling:** a carrier running with the ball keeps it at his feet — it follows his speed and direction through turns instead of trailing behind; a hard kick or a tackle still breaks it loose.
 - **Curlers:** shots with spin bend in flight, aimed at the far post.
 - **Replays:** every goal is replayed from two cameras (skip with `Space`/`Enter`); `V` replays the last 8 seconds.
 

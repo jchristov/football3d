@@ -280,6 +280,8 @@ export class Hud {
       const ch = p ? p.charge : 0;
       this.barWraps[i].classList.toggle('on', ch > 0.02);
       this.bars[i].style.width = `${Math.round(ch * 100)}%`;
+      this.bars[i].style.background = `hsl(${Math.round(130 * (1 - ch))} 90% 52%)`;
+      this.barWraps[i].classList.toggle('max', ch >= 0.99);
     }
     this.drawMinimap(game);
     this.updateTags(game);

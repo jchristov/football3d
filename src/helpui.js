@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const PAD = [['Left stick / D-pad', 'Move'], ['B', 'Shoot'], ['A', 'Pass (hold = lob)'], ['X', 'Slide tackle'], ['Y', 'Switch player'], ['LB', 'Curler'], ['RB / triggers', 'Sprint'], ['Start / Back / R3', 'Pause / Camera / Replay']];
 
 const MOUSE = [['Move the pointer', 'Run towards it (when no key is held)'], ['Left button (hold)', 'Shoot at the pointer, release to kick'], ['Right button (hold)', 'Pass to the pointer (hold = lob)'], ['Middle button', 'Slide tackle'], ['Wheel', 'Switch player'], ['Far pointer', 'Sprints automatically']];
-const TOUCH = [['Left side of the screen', 'Drag: floating stick (to the edge = sprint)'], ['SHOOT / PASS', 'Hold to charge / lob'], ['Tap a player', 'Control him (your team, on the pitch)'], ['TACKLE · SWITCH', 'Tap'], ['CURL', 'Toggle, then shoot'], ['⏸ 🎥 ⏪ 🤖', 'Pause, camera, replay, autopilot'], ['🔁 ⚙ ⛶ 🔊', 'Team changes, settings, full screen, sound (top right)']];
+const TOUCH = [['Left side of the screen', 'Drag: floating stick (to the edge = sprint)'], ['SHOOT / PASS', 'Hold to charge a harder shot / lob; with a ball in the air at head height: header'], ['Tap a player', 'Control him (your team, on the pitch)'], ['TACKLE · SWITCH', 'Tap'], ['CURL', 'Toggle, then shoot'], ['⏸ 🎥 ⏪ 🤖', 'Pause, camera, replay, autopilot'], ['🔁 ⚙ ⛶ 🔊', 'Team changes, settings, full screen, sound (top right)']];
 const kbd = (k) => `<kbd>${k}</kbd>`;
 const rows = (list) => list.map(([k, d]) => `<tr><td>${k}</td><td>${d}</td></tr>`).join('');
 

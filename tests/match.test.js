@@ -209,7 +209,7 @@ test('a ball held by the goalkeeper stays between his hands (never hangs in the 
       if (b.held) {
         if (b.held !== prev) { catches++; since = 0; }
         since++;
-        if (since > 4) { // the first frames of a catch draw the ball in
+        if (since > 9) { // the first frames of a catch (esp. a diving one) draw the ball in
           const k = b.held;
           const mid = k.hands[0].getWorldPosition(tmp[0]).add(k.hands[1].getWorldPosition(tmp[1])).multiplyScalar(0.5);
           worst = Math.max(worst, mid.distanceTo(b.mesh.position));

@@ -88,9 +88,10 @@ button.small, .row button { padding: 8px 16px; font-size: 14px; }
 #toast { position: absolute; top: 38%; left: 50%; transform: translate(-50%, 0); font-size: 30px; font-weight: 900; font-style: italic; letter-spacing: .1em; color: #fff; text-shadow: 0 3px 14px rgba(0,0,0,.8); opacity: 0; transition: opacity .2s; }
 #toast.show { opacity: 1; }
 #powers { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; }
-.powerWrap { width: 220px; height: 12px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; overflow: hidden; opacity: 0; transition: opacity .15s; }
+.powerWrap { width: 220px; height: 14px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; overflow: hidden; opacity: 0; transition: opacity .15s; }
 .powerWrap.on { opacity: 1; }
-.power { height: 100%; width: 0; background: linear-gradient(90deg, #2ee27a, #ffd21e, #ff4d3d); }
+.power { height: 100%; width: 0; background: #2ee27a; }
+.powerWrap.max { border-color: #fff; box-shadow: 0 0 12px #ff4d3d; }
 #powerWrap2 { display: none; }
 body.two #powerWrap2 { display: block; }
 body.two .powerWrap { width: 180px; }

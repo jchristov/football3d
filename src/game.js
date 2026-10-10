@@ -547,7 +547,7 @@ export class Game {
     const dir = attackDir(p.team), gx = dir * PITCH.hl;
     const inRange = Math.abs(gx - p.pos.x) < sq(26);
     const air = b.pos.y > 0.45 && !b.held;
-    let speed = 11 + 17 * charge, lift = 0.6 + 5 * charge * charge;
+    let speed = 8.5 + 20.5 * charge, lift = 0.5 + 5 * charge * charge; // a tap is a gentle push, a full charge a rocket
     if (air) { speed = speed * 1.05 + Math.min(b.speed * 0.35, 5); lift = 0.4 + 2 * charge * charge; }
     if (curl && inRange && charge > 0.3) {
       this.hud.toast('CURLER!');
@@ -584,7 +584,21 @@ export class Game {
   }
 
   // ---------- simulation ----------
-  header(p) {
+  // A ball in the air at head height and close enough to jump for
+  canHead(p) {
+    const b = this.ball;
+    return !p.isGK && !b.held && b.pos.y > 1.5 && b.pos.y < 3.2 && p.headCd <= 0 && p.kickCd <= 0 && p.stunT <= 0 && p.lungeT <= 0
+      && Math.hypot(b.pos.x - p.pos.x, b.pos.z - p.pos.z) < 1.9;
+  }
+
+  // The human asks for a header (shoot = power header towards goal / where aimed, pass = nod to a team mate)
+  humanHeader(p, charge, want, pass) {
+    if (!this.canHead(p)) return false;
+    this.header(p, { charge, want, pass });
+    return true;
+  }
+
+  header(p, ask = null) {
     const b = this.ball, ctrl = this.ctrls.find((c) => c.enabled && c.player === p);
     const dir = attackDir(p.team), gx = dir * PITCH.hl;
     const gd = Math.hypot(gx - p.pos.x, p.pos.z);
@@ -595,7 +609,24 @@ export class Game {
     this.checkOffside(p);
     if (this.state !== 'playing') return;
     let angle, speed, lift, atGoal = false;
-    if (ctrl) {
+    if (ctrl && ask) {
+      const aim = ask.want ?? p.facing;
+      if (ask.pass) {
+        const t = this.bestPass(p, this.teams[p.team], this.teams[1 - p.team], dir, ask.want);
+        angle = t ? Math.atan2(t.pos.z - p.pos.z, t.pos.x - p.pos.x) : aim;
+        speed = t ? this.passSpeed(Math.hypot(t.pos.x - p.pos.x, t.pos.z - p.pos.z)) * 0.9 : 10;
+        lift = 1.6;
+      } else {
+        const toGoal = Math.atan2(-p.pos.z * 0.35, gx - p.pos.x);
+        const dg = angleDiff(aim, toGoal);
+        angle = aim;
+        if (Math.abs(dg) < 0.6 && gd < 26) { angle += dg * 0.7; atGoal = true; }
+        speed = (9 + 14 * ask.charge) * aptitude(p, 'att');
+        lift = atGoal ? 0.1 + 0.9 * (1 - ask.charge) : 1.2 + 2 * (1 - ask.charge);
+        if (atGoal) this.hud.toast('HEADER!');
+      }
+      p.charge = 0;
+    } else if (ctrl) {
       const mv = ctrl.moveVector();
       const power = this.input.down(...ctrl.keys.shoot);
       if (power && gd < 24) {
@@ -662,8 +693,8 @@ export class Game {
       }
       if (p.isGK || b.held) continue;
 
-      if (b.pos.y > 1.15 && b.pos.y < 2.7 && p.headCd <= 0 && p.kickCd <= 0 && p.stunT <= 0 && p.lungeT <= 0
-        && Math.hypot(b.pos.x - p.pos.x, b.pos.z - p.pos.z) < 1.15) {
+      if (b.pos.y > 1.1 && b.pos.y < 2.9 && p.headCd <= 0 && p.kickCd <= 0 && p.stunT <= 0 && p.lungeT <= 0
+        && Math.hypot(b.pos.x - p.pos.x, b.pos.z - p.pos.z) < 1.2) {
         this.header(p);
         continue;
       }
@@ -681,6 +712,22 @@ export class Game {
     if (!cands.length) return;
     cands.sort((x, y) => x.d - y.d);
     this.takeBall(cands[0].p);
+  }
+
+  // Close control: a dribbled ball is drawn to a spot just ahead of the carrier's feet and travels with him, so it does not
+  // trail behind when he turns or changes pace. A sprinter lets it run further ahead; a kick, tackle or stun cuts it loose.
+  stickBall(dt) {
+    const b = this.ball, p = b.owner;
+    if (!p || b.held || p.isGK || p.kickCd > 0 || p.stunT > 0 || p.lungeT > 0 || p.throwing || p.speed < 0.6) return;
+    if (b.pos.y > 0.35) return;
+    const bx = b.pos.x - p.pos.x, bz = b.pos.z - p.pos.z;
+    if (Math.hypot(bx, bz) > 1.3) return;
+    if (Math.hypot(b.vel.x - p.vel.x, b.vel.z - p.vel.z) > 7) return; // struck or deflected, not dribbled
+    const ahead = 0.5 + 0.05 * Math.min(p.speed, 8);
+    const tx = p.pos.x + Math.cos(p.facing) * ahead, tz = p.pos.z + Math.sin(p.facing) * ahead;
+    const k = 1 - Math.exp(-(11 + 6 * (this.humanAssist[p.team] || 0)) * dt);
+    b.vel.x += (p.vel.x + (tx - b.pos.x) * 9 - b.vel.x) * k;
+    b.vel.z += (p.vel.z + (tz - b.pos.z) * 9 - b.vel.z) * k;
   }
 
   facingBall(p) {
@@ -727,7 +774,7 @@ export class Game {
     const sp = p.speed;
     if (sp < 0.8) { b.vel.x *= 0.5; b.vel.z *= 0.5; }
     else {
-      const push = mine ? 1.3 + 0.2 * sp : 1.8 + 0.2 * sp; // a controlled dribble pushes the ball less far ahead
+      const push = mine ? 0.5 + 0.1 * sp : 1.8 + 0.2 * sp; // a controlled dribble pushes the ball less far ahead
       b.vel.x = p.vel.x + Math.cos(p.facing) * push;
       b.vel.z = p.vel.z + Math.sin(p.facing) * push;
     }
@@ -762,6 +809,7 @@ export class Game {
     if (!so && !this.attract) { this.stats.tick(this.possessionTeam(), dt); this.stats.tickPlayers(this.all, dt); }
     this.separate();
     this.contacts();
+    this.stickBall(dt);
     if (b.owner && !b.held && Math.hypot(b.owner.pos.x - b.pos.x, b.owner.pos.z - b.pos.z) > 3.5) b.owner = null;
     b.step(dt);
 

@@ -420,7 +420,8 @@ export class Player {
     if (this.jumpT > 0) {
       const u = 1 - this.jumpT / 0.5;
       rigY += Math.sin(u * Math.PI) * 0.65;
-      T[UP_X] = -0.35; T[SH_L] = T[SH_R] = -0.8; T[AB_L] = T[AB_R] = 0.7;
+      T[UP_X] = -0.5 + 1.0 * Math.sin(Math.min(1, u * 1.6) * Math.PI * 0.75); // lean back, then snap the neck and chest forward
+      T[SH_L] = T[SH_R] = -0.8; T[AB_L] = T[AB_R] = 0.7;
       T[HIP_L] = 0.25; T[KNEE_L] = 0.9; T[HIP_R] = 0.1; T[KNEE_R] = 0.5;
     }
     T[RIG_X] = rigX; T[RIG_Y] = rigY; T[RIG_Z] = rigZ;
